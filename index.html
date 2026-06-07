@@ -1,0 +1,1456 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InbleltOS (Strict Sandbox)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <style>
+        /* Базовые настройки MD1 */
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Roboto', sans-serif;
+            background-color: #ECEFF1; 
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: #212121;
+            user-select: none;
+            transition: background 0.3s;
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="28" viewBox="0 0 24 28"><path d="M2 2 L14 14 H8.5 L12 21.5 L9.5 22.5 L6 15 L2 19 V2 Z" fill="%23212121" stroke="%23ffffff" stroke-width="1.5" stroke-linejoin="round"/></svg>') 2 2, default;
+        }
+
+        /* --- Экран Входа в Систему --- */
+        #login-screen {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background-color: #ECEFF1;
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .login-title {
+            font-size: 32px;
+            font-weight: 400;
+            color: #37474F;
+            margin-bottom: 48px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        #login-users-list {
+            display: flex;
+            gap: 24px;
+            justify-content: center;
+            flex-wrap: wrap;
+            max-width: 800px;
+        }
+
+        .login-user-card {
+            background: #FFFFFF;
+            padding: 32px;
+            border-radius: 2px;
+            box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 1px 5px 0 rgba(0,0,0,0.12), 0 3px 1px -2px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer !important;
+            transition: transform 0.2s, box-shadow 0.2s;
+            min-width: 140px;
+            position: relative;
+        }
+        .login-user-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 10px 1px rgba(0,0,0,0.14), 0 3px 14px 2px rgba(0,0,0,0.12), 0 5px 5px -3px rgba(0,0,0,0.2);
+        }
+        .login-user-card .material-icons.avatar {
+            font-size: 72px;
+            color: #009688;
+            margin-bottom: 16px;
+        }
+        .login-user-card span {
+            font-size: 20px;
+            font-weight: 500;
+            color: #212121;
+        }
+
+        /* --- Рабочий Стол и UI --- */
+        #desktop {
+            width: 100vw; height: calc(100vh - 48px);
+            position: relative; padding: 16px; box-sizing: border-box;
+            display: none; 
+            flex-direction: column; align-content: flex-start; flex-wrap: wrap; gap: 8px;
+        }
+
+        .desktop-icon, .start-btn, .taskbar-item, .start-menu-item, button, .window-controls .material-icons, #user-display, .context-menu-item {
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="28" viewBox="0 0 24 28"><path d="M2 2 L14 14 H8.5 L12 21.5 L9.5 22.5 L6 15 L2 19 V2 Z" fill="%23FF4081" stroke="%23ffffff" stroke-width="1.5" stroke-linejoin="round"/></svg>') 2 2, pointer !important;
+        }
+
+        .desktop-icon {
+            width: 90px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 12px 8px; border-radius: 2px; transition: background-color 0.2s ease; text-align: center; color: #FFFFFF;
+        }
+        .desktop-icon:hover { background-color: rgba(0, 0, 0, 0.2); }
+        .desktop-icon .material-icons { font-size: 48px; margin-bottom: 8px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
+        .desktop-icon span { font-size: 13px; font-weight: 500; color: #FFFFFF; text-shadow: 0 1px 3px rgba(0,0,0,0.9), 0 0 4px rgba(0,0,0,0.6); }
+
+        #taskbar {
+            position: fixed; bottom: 0; width: 100%; height: 48px; background-color: #263238;
+            display: none;
+            align-items: center; padding: 0 8px; box-sizing: border-box; z-index: 10000;
+            box-shadow: 0 -2px 4px -1px rgba(0,0,0,0.2), 0 -4px 5px 0 rgba(0,0,0,0.14), 0 -1px 10px 0 rgba(0,0,0,0.12);
+        }
+
+        .start-btn { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; transition: background-color 0.2s; color: #FFFFFF; }
+        .start-btn:hover { background-color: rgba(255, 255, 255, 0.1); }
+        .start-btn .material-icons { font-size: 26px; }
+
+        #taskbar-apps { display: flex; flex-grow: 1; margin-left: 12px; gap: 6px; overflow-x: auto; }
+        #taskbar-apps::-webkit-scrollbar { display: none; }
+        
+        .taskbar-item { display: flex; align-items: center; padding: 0 16px; height: 36px; background-color: transparent; color: #B0BEC5; border-radius: 2px; font-size: 14px; font-weight: 500; text-transform: uppercase; transition: background-color 0.15s, color 0.15s; max-width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .taskbar-item:hover { background-color: rgba(255, 255, 255, 0.1); color: #FFFFFF; }
+        .taskbar-item.active { background-color: rgba(255, 255, 255, 0.15); color: #FFFFFF; border-bottom: 2px solid #FF4081; }
+        .taskbar-item .material-icons { font-size: 18px; margin-right: 8px; }
+
+        #user-display { display: flex; align-items: center; padding: 0 12px; height: 36px; border-radius: 2px; color: #FFFFFF; font-size: 14px; font-weight: 500; transition: background-color 0.2s; }
+        #user-display:hover { background-color: rgba(255, 255, 255, 0.1); }
+        #user-display .material-icons { margin-right: 6px; font-size: 18px; }
+
+        #clock { margin-left: 8px; font-size: 14px; font-weight: 500; color: #FFFFFF; padding-right: 8px; cursor: default; }
+
+        #start-menu { position: fixed; bottom: 56px; left: 16px; width: 280px; background-color: #FFFFFF; border-radius: 2px; box-shadow: 0 8px 10px 1px rgba(0,0,0,0.14), 0 3px 14px 2px rgba(0,0,0,0.12), 0 5px 5px -3px rgba(0,0,0,0.2); display: none; flex-direction: column; padding: 8px 0; z-index: 9999; transform-origin: bottom left; animation: menuPop 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        @keyframes menuPop { from { opacity: 0; transform: scale(0.9) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+
+        .start-menu-item { display: flex; align-items: center; padding: 12px 24px; font-size: 15px; font-weight: 500; color: #212121; transition: background-color 0.15s; }
+        .start-menu-item:hover { background-color: #EEEEEE; }
+        .start-menu-item .material-icons { margin-right: 24px; font-size: 24px; color: #757575; }
+
+        /* Окна */
+        @keyframes windowAppear { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        .window { position: absolute; background-color: #FAFAFA; color: #212121; border-radius: 2px; box-shadow: 0 16px 24px 2px rgba(0,0,0,0.14), 0 6px 30px 5px rgba(0,0,0,0.12), 0 8px 10px -5px rgba(0,0,0,0.2); display: flex; flex-direction: column; overflow: hidden; transition: opacity 0.2s, width 0.2s, height 0.2s; animation: windowAppear 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .window.maximized { top: 0 !important; left: 0 !important; width: 100vw !important; height: calc(100vh - 48px) !important; border-radius: 0; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        
+        .title-bar { height: 56px; padding: 0 16px; display: flex; justify-content: space-between; align-items: center; color: #FFFFFF; cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5" fill="%23212121" stroke="%23ffffff" stroke-width="1.5"/></svg>') 12 12, grab !important; box-shadow: 0 2px 5px rgba(0,0,0,0.26); z-index: 10; }
+        .window.maximized .title-bar { cursor: default !important; }
+        .title-bar:active { cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" fill="%23FF4081" stroke="%23ffffff" stroke-width="1.5"/></svg>') 12 12, grabbing !important; }
+        .title-info { display: flex; align-items: center; font-weight: 500; font-size: 20px; }
+        .title-info .material-icons { font-size: 24px; margin-right: 16px; color: #FFFFFF; }
+        .window-controls { display: flex; gap: 8px; }
+        .window-controls .material-icons { font-size: 20px; padding: 8px; color: #FFFFFF; border-radius: 50%; transition: 0.15s; }
+        .window-controls .material-icons:hover { background-color: rgba(255, 255, 255, 0.2); }
+        .window-content { flex-grow: 1; overflow: hidden; display: flex; flex-direction: column; background-color: #FAFAFA; position: relative; }
+
+        /* Элементы MD1 */
+        button { background: #FF4081; color: white; border: none; padding: 8px 16px; border-radius: 2px; font-size: 14px; font-weight: 500; text-transform: uppercase; box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 1px 5px 0 rgba(0,0,0,0.12), 0 3px 1px -2px rgba(0,0,0,0.2); transition: background 0.2s, box-shadow 0.2s; font-family: 'Roboto', sans-serif; letter-spacing: 0.5px; }
+        button:hover { background: #F50057; box-shadow: 0 3px 3px 0 rgba(0,0,0,0.14), 0 1px 7px 0 rgba(0,0,0,0.12), 0 3px 1px -1px rgba(0,0,0,0.2); }
+        button:active { background: #C51162; box-shadow: 0 4px 5px 0 rgba(0,0,0,0.14), 0 1px 10px 0 rgba(0,0,0,0.12), 0 2px 4px -1px rgba(0,0,0,0.2); }
+        button:disabled { background: #B0BEC5; color: #78909C; box-shadow: none; cursor: not-allowed !important; }
+        
+        input[type="text"], input[type="password"] { border: none; border-bottom: 2px solid #B0BEC5; background: transparent; padding: 8px 0; font-size: 16px; outline: none; transition: border-bottom-color 0.2s; font-family: 'Roboto', sans-serif; color: #212121; }
+        input[type="text"]:focus, input[type="password"]:focus { border-bottom-color: #3F51B5; }
+
+        .app-notepad, input[type="text"], input[type="password"] { cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M12 4v16m-4-16h8m-8 16h8" stroke="%23212121" stroke-width="2" fill="none"/></svg>') 12 12, text !important; }
+        .app-terminal, .app-terminal-input { cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M12 4v16m-4-16h8m-8 16h8" stroke="%2300E676" stroke-width="2" fill="none"/></svg>') 12 12, text !important; }
+
+        /* Приложения */
+        .app-browser-container { display: flex; flex-direction: column; height: 100%; background: #FAFAFA; }
+        .app-browser-tabs-container { display: flex; background: #D32F2F; padding: 8px 8px 0 8px; align-items: flex-end; overflow-x: auto; }
+        .app-browser-tabs-container::-webkit-scrollbar { height: 4px; }
+        .app-browser-tabs-container::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 4px; }
+        .browser-tabs { display: flex; gap: 4px; flex-grow: 1; }
+        .browser-tab { display: flex; align-items: center; background: #EF5350; color: rgba(255,255,255,0.8); padding: 8px 12px; border-radius: 4px 4px 0 0; cursor: pointer; font-size: 13px; max-width: 200px; min-width: 120px; transition: background 0.2s, color 0.2s; }
+        .browser-tab:hover { background: #E57373; color: #FFF; }
+        .browser-tab.active { background: #EEEEEE; color: #212121; }
+        .browser-tab .tab-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-grow: 1; margin-right: 8px; pointer-events: none; }
+        .browser-tab .close-tab { font-size: 16px; opacity: 0.6; transition: opacity 0.2s, background 0.2s; border-radius: 50%; }
+        .browser-tab .close-tab:hover { opacity: 1; background: rgba(0,0,0,0.1); }
+        .app-browser-bar { display: flex; padding: 8px 16px; background: #EEEEEE; gap: 12px; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); z-index: 5; }
+        .app-browser-bar input { flex-grow: 1; border: none; padding: 8px 12px; border-radius: 2px; background: #FFFFFF; font-size: 14px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.1); margin: 0; }
+        .app-browser-bar input:focus { outline: 1px solid #F44336; }
+        .browser-frames-container { flex-grow: 1; position: relative; }
+        .browser-iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; display: none; background: #FFF; }
+        .browser-iframe.active { display: block; }
+        
+        .app-terminal { background: #263238; color: #00E676; font-family: 'Consolas', monospace; padding: 16px; display: flex; flex-direction: column; height: 100%; box-sizing: border-box; font-size: 14px;}
+        .app-terminal-output { flex-grow: 1; overflow-y: auto; margin-bottom: 8px; white-space: pre-wrap; word-wrap: break-word; }
+        .app-terminal-input-row { display: flex; align-items: center; }
+        .app-terminal-input-row span { margin-right: 8px; font-weight: bold;}
+        .app-terminal-input { flex-grow: 1; border: none; color: #00E676; outline: none; border-bottom: none; padding: 0;}
+        
+        .app-calc { display: flex; flex-direction: column; height: 100%; background: #FAFAFA; }
+        .app-calc-display { background: #FFFFFF; padding: 24px 16px; font-size: 36px; text-align: right; box-shadow: 0 1px 3px rgba(0,0,0,0.12); overflow: hidden; text-overflow: ellipsis; color: #212121; }
+        .app-calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); flex-grow: 1; }
+        .app-calc-btn { background: #FAFAFA; border: none; border-right: 1px solid #E0E0E0; border-bottom: 1px solid #E0E0E0; border-radius: 0; font-size: 20px; font-weight: 400; color: #212121; box-shadow: none; transition: background 0.15s; text-transform: none; }
+        .app-calc-btn:hover { background: #EEEEEE; }
+        .app-calc-btn.op { background: #EEEEEE; color: #3F51B5; font-weight: 500; }
+        .app-calc-btn.equal { background: #3F51B5; color: #FFFFFF; grid-column: span 2; }
+        .app-calc-btn.equal:hover { background: #303F9F; }
+
+        .app-tasks { padding: 24px; display: flex; flex-direction: column; height: 100%; box-sizing: border-box; background: #FAFAFA;}
+        .task-input-row { display: flex; gap: 16px; margin-bottom: 24px; align-items: flex-end; }
+        .task-input-row input { flex-grow: 1; margin-bottom: 4px; }
+        .task-list { list-style: none; padding: 0; margin: 0; flex-grow: 1; overflow-y: auto; background: #FFFFFF; box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); border-radius: 2px;}
+        .task-item { display: flex; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 1px solid #EEEEEE; transition: background 0.2s;}
+        .task-item:last-child { border-bottom: none; }
+        .task-item:hover { background: #F5F5F5; }
+        .task-item.completed span { text-decoration: line-through; color: #9E9E9E; }
+        .task-item button { background: transparent; color: #757575; box-shadow: none; padding: 8px; border-radius: 50%; opacity: 0;}
+        .task-item button:hover { background: rgba(0,0,0,0.05); color: #F44336; }
+        .task-item:hover button { opacity: 1; }
+
+        /* Вкладки Настроек */
+        .app-settings { display: flex; flex-direction: column; height: 100%; background: #FAFAFA; }
+        .settings-nav { display: flex; background: #607D8B; padding: 0 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .settings-tab-btn { background: transparent; color: rgba(255,255,255,0.7); box-shadow: none; border-radius: 0; padding: 16px 24px; border-bottom: 2px solid transparent; font-size: 14px; font-weight: 500; }
+        .settings-tab-btn:hover { background: rgba(255,255,255,0.1); box-shadow: none; color: #FFF; }
+        .settings-tab-btn.active { color: #FFF; border-bottom-color: #FFF; }
+        .settings-content { padding: 24px; flex-grow: 1; overflow-y: auto; }
+        .settings-section { display: none; animation: fadeIn 0.2s ease; }
+        .settings-section.active { display: block; }
+        .settings-content h3 { margin-top: 0; font-weight: 500; font-size: 20px; color: #212121; margin-bottom: 8px; }
+        .color-picker-row { display: flex; align-items: center; gap: 16px; margin-top: 24px; padding: 16px; background: #FFFFFF; border-radius: 2px; box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); }
+        .color-picker-row input[type="color"] { cursor: pointer; border: none; width: 48px; height: 48px; padding: 0; background: none; }
+
+        /* Контекстное Меню */
+        #context-menu { position: fixed; background-color: #FFFFFF; border-radius: 2px; box-shadow: 0 8px 10px 1px rgba(0,0,0,0.14), 0 3px 14px 2px rgba(0,0,0,0.12), 0 5px 5px -3px rgba(0,0,0,0.2); padding: 8px 0; min-width: 200px; z-index: 20000; display: none; transform-origin: top left; animation: menuPop 0.15s cubic-bezier(0.4, 0, 0.2, 1); }
+        .context-menu-item { display: flex; align-items: center; padding: 12px 24px; font-size: 15px; font-weight: 400; color: #212121; transition: background-color 0.15s; }
+        .context-menu-item:hover { background-color: #EEEEEE; }
+        .context-menu-item .material-icons { margin-right: 24px; font-size: 20px; color: #757575; }
+
+        /* Стили Проводника */
+        .explorer-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; background: white; }
+        .explorer-table th { background: #ECEFF1; padding: 10px; font-weight: 500; border-bottom: 1px solid #CFD8DC; color: #455A64; }
+        .explorer-table td { padding: 10px; border-bottom: 1px solid #F5F5F5; color: #212121; vertical-align: middle; }
+        .explorer-table tr:hover td { background: #F5F5F5; }
+    </style>
+</head>
+<body>
+
+    <div id="login-screen">
+        <h1 class="login-title">Вход в InbleltOS</h1>
+        <div id="login-users-list"></div>
+        
+        <div id="password-container" style="display: none; background: #FFFFFF; padding: 32px; border-radius: 2px; box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 1px 5px 0 rgba(0,0,0,0.12), 0 3px 1px -2px rgba(0,0,0,0.2); flex-direction: column; align-items: center; min-width: 280px; gap: 16px; animation: fadeIn 0.2s ease;">
+            <span class="material-icons" style="font-size: 72px; color: #009688;">account_circle</span>
+            <span id="password-target-user" style="font-size: 20px; font-weight: 500; color: #212121;">Пользователь</span>
+            <input type="password" id="login-password-input" placeholder="Введите пароль" style="width: 100%;">
+            <div id="login-error-msg" style="color: #F44336; font-size: 14px; display: none; font-weight: 500;">Неверный пароль!</div>
+            <div style="display: flex; gap: 12px; width: 100%; justify-content: flex-end; margin-top: 8px;">
+                <button id="password-back-btn" style="background: transparent; color: #757575; box-shadow: none;">Назад</button>
+                <button id="password-submit-btn">Войти</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="desktop">
+        <div class="desktop-icon" onclick="launchApp('explorer')">
+            <span class="material-icons" style="color: #FFB300;">folder</span>
+            <span>Проводник</span>
+        </div>
+        <div class="desktop-icon" onclick="launchApp('store')">
+            <span class="material-icons" style="color: #E91E63;">storefront</span>
+            <span>Магазин</span>
+        </div>
+        <div class="desktop-icon" onclick="launchApp('browser')">
+            <span class="material-icons" style="color: #F44336;">language</span>
+            <span>Браузер</span>
+        </div>
+        <div class="desktop-icon" onclick="launchApp('tasks')">
+            <span class="material-icons" style="color: #2196F3;">task_alt</span>
+            <span>Задачи</span>
+        </div>
+        <div class="desktop-icon" onclick="launchApp('notepad')">
+            <span class="material-icons" style="color: #FF9800;">description</span>
+            <span>Блокнот</span>
+        </div>
+        <div class="desktop-icon" onclick="launchApp('terminal')">
+            <span class="material-icons" style="color: #455A64;">terminal</span>
+            <span>Терминал</span>
+        </div>
+        <div class="desktop-icon" onclick="launchApp('calculator')">
+            <span class="material-icons" style="color: #673AB7;">calculate</span>
+            <span>Калькулятор</span>
+        </div>
+        <div class="desktop-icon" onclick="launchApp('settings')">
+            <span class="material-icons" style="color: #607D8B;">settings</span>
+            <span>Настройки</span>
+        </div>
+    </div>
+
+    <div id="context-menu">
+        <div class="context-menu-item" onclick="location.reload()">
+            <span class="material-icons">refresh</span> Обновить
+        </div>
+        <div style="height: 1px; background: #E0E0E0; margin: 8px 0;"></div>
+        <div class="context-menu-item" onclick="launchApp('notepad')">
+            <span class="material-icons">note_add</span> Создать файл
+        </div>
+        <div class="context-menu-item" onclick="launchApp('settings')">
+            <span class="material-icons">wallpaper</span> Фон стола
+        </div>
+    </div>
+
+    <div id="start-menu">
+        <div class="start-menu-item" onclick="launchApp('explorer')">
+            <span class="material-icons" style="color: #FFB300;">folder</span> Проводник
+        </div>
+        <div class="start-menu-item" onclick="launchApp('store')">
+            <span class="material-icons" style="color: #E91E63;">storefront</span> Магазин приложений
+        </div>
+        <div class="start-menu-item" onclick="launchApp('tasks')">
+            <span class="material-icons" style="color: #2196F3;">task_alt</span> Задачи
+        </div>
+        <div class="start-menu-item" onclick="launchApp('browser')">
+            <span class="material-icons" style="color: #F44336;">language</span> Обозреватель
+        </div>
+        <div class="start-menu-item" onclick="launchApp('notepad')">
+            <span class="material-icons" style="color: #FF9800;">edit</span> Блокнот
+        </div>
+        <div class="start-menu-item" onclick="launchApp('calculator')">
+            <span class="material-icons" style="color: #673AB7;">calculate</span> Калькулятор
+        </div>
+        <div class="start-menu-item" onclick="launchApp('settings')">
+            <span class="material-icons" style="color: #607D8B;">settings</span> Настройки
+        </div>
+        <div style="height: 1px; background: #E0E0E0; margin: 8px 0;"></div>
+        <div class="start-menu-item" onclick="logoutSystem()">
+            <span class="material-icons" style="color: #757575;">power_settings_new</span> Завершение работы
+        </div>
+    </div>
+
+    <div id="taskbar">
+        <div class="start-btn" id="start-btn" onclick="toggleStartMenu()">
+            <span class="material-icons">apps</span>
+        </div>
+        <div id="taskbar-apps"></div>
+        <div id="user-display" onclick="logoutSystem()" title="Сменить пользователя / Выйти">
+            <span class="material-icons">account_circle</span>
+            <span id="current-user-name">Гость</span>
+        </div>
+        <div id="clock">00:00</div>
+    </div>
+
+    <script>
+        // --- Глобальное Перехватывание Системных Окон (Alert) ---
+        window.alert = function(message) {
+            const overlay = document.createElement('div');
+            overlay.style.cssText = "position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.4); z-index: 200000; display: flex; align-items: center; justify-content: center; animation: fadeIn 0.2s ease;";
+            
+            overlay.innerHTML = `
+                <div style="background: #FFFFFF; min-width: 280px; max-width: 420px; padding: 24px; border-radius: 2px; box-shadow: 0 9px 46px 8px rgba(0,0,0,0.14), 0 11px 15px -7px rgba(0,0,0,0.12), 0 24px 38px 3px rgba(0,0,0,0.2); animation: windowAppear 0.2s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; gap: 12px;">
+                    <h3 style="margin-top: 0; margin-bottom: 0; font-weight: 500; font-size: 20px; color: #212121; display: flex; align-items: center; gap: 8px;">
+                        <span class="material-icons" style="color: #FF4081;">info</span> Система
+                    </h3>
+                    <div style="font-size: 15px; color: #757575; line-height: 1.5; white-space: pre-wrap; word-break: break-word; padding: 4px 0 12px 0;">${message}</div>
+                    <div style="display: flex; justify-content: flex-end;">
+                        <button id="os-alert-ok-btn" style="background: transparent; color: #FF4081; box-shadow: none; font-weight: 500; font-size: 14px; padding: 8px 16px;">ОК</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(overlay);
+            
+            const okBtn = overlay.querySelector('#os-alert-ok-btn');
+            okBtn.style.cursor = `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="28" viewBox="0 0 24 28"><path d="M2 2 L14 14 H8.5 L12 21.5 L9.5 22.5 L6 15 L2 19 V2 Z" fill="%23FF4081" stroke="%23ffffff" stroke-width="1.5" stroke-linejoin="round"/></svg>') 2 2, pointer`;
+            
+            okBtn.onclick = () => { overlay.remove(); };
+        };
+
+        // --- Изолированная Виртуальная Файловая Система (IndexedDB) ---
+        const VFS = {
+            db: null,
+            init() {
+                return new Promise((resolve) => {
+                    let request = indexedDB.open("InbleltOS_VFS", 1);
+                    request.onupgradeneeded = (e) => {
+                        let db = e.target.result;
+                        if (!db.objectStoreNames.contains("files")) {
+                            db.createObjectStore("files", { keyPath: "id", autoIncrement: true });
+                        }
+                    };
+                    request.onsuccess = (e) => {
+                        this.db = e.target.result;
+                        resolve();
+                    };
+                    request.onerror = () => {
+                        console.error("Ошибка инициализации файловой системы VFS");
+                        resolve();
+                    };
+                });
+            },
+            addFile(username, name, type, blob) {
+                return new Promise((resolve) => {
+                    let transaction = this.db.transaction("files", "readwrite");
+                    let store = transaction.objectStore("files");
+                    let fileRecord = {
+                        username: username,
+                        name: name,
+                        type: type || "application/octet-stream",
+                        size: blob.size,
+                        blob: blob,
+                        date: new Date().toLocaleString()
+                    };
+                    store.add(fileRecord);
+                    transaction.oncomplete = () => {
+                        window.dispatchEvent(new CustomEvent('vfs_changed'));
+                        resolve(true);
+                    };
+                });
+            },
+            getFiles(username) {
+                return new Promise((resolve) => {
+                    let transaction = this.db.transaction("files", "readonly");
+                    let store = transaction.objectStore("files");
+                    let request = store.getAll();
+                    request.onsuccess = () => {
+                        let allFiles = request.result || [];
+                        resolve(allFiles.filter(f => f.username === username));
+                    };
+                });
+            },
+            deleteFile(id) {
+                return new Promise((resolve) => {
+                    let transaction = this.db.transaction("files", "readwrite");
+                    let store = transaction.objectStore("files");
+                    store.delete(id);
+                    transaction.oncomplete = () => {
+                        window.dispatchEvent(new CustomEvent('vfs_changed'));
+                        resolve(true);
+                    };
+                });
+            }
+        };
+
+        // Глобальные переменные ОС
+        let currentUser = null;
+        let selectedUserObj = null; 
+        
+        let usersList = JSON.parse(localStorage.getItem('os_users_list') || '[{"name": "Гость", "password": ""}]');
+        if (usersList.length > 0 && typeof usersList[0] === 'string') {
+            usersList = usersList.map(username => ({ name: username, password: "" }));
+            localStorage.setItem('os_users_list', JSON.stringify(usersList));
+        }
+
+        let installedApps = JSON.parse(localStorage.getItem('os_installed_apps') || '{}');
+        let highestZIndex = 100;
+
+        function getUserKey(key) { return `os_${currentUser}_${key}`; }
+        function saveUserData(key, value) { localStorage.setItem(getUserKey(key), value); }
+        function loadUserData(key) { return localStorage.getItem(getUserKey(key)); }
+
+        function initLoginScreen() {
+            document.getElementById('login-users-list').style.display = 'flex';
+            document.getElementById('password-container').style.display = 'none';
+            document.getElementById('login-password-input').value = '';
+            document.getElementById('login-error-msg').style.display = 'none';
+            selectedUserObj = null;
+
+            const listEl = document.getElementById('login-users-list');
+            listEl.innerHTML = '';
+            
+            usersList.forEach(userObj => {
+                const card = document.createElement('div');
+                card.className = 'login-user-card';
+                card.onclick = () => handleUserSelection(userObj);
+                card.innerHTML = `
+                    <span class="material-icons avatar">account_circle</span>
+                    <span>${userObj.name}</span>
+                    ${userObj.password ? '<span class="material-icons" style="position: absolute; top: 12px; right: 12px; color: #757575; font-size: 18px;" title="Требуется пароль">lock</span>' : ''}
+                `;
+                listEl.appendChild(card);
+            });
+        }
+
+        function handleUserSelection(userObj) {
+            if (!userObj.password) {
+                loginSystem(userObj.name);
+            } else {
+                selectedUserObj = userObj;
+                document.getElementById('login-users-list').style.display = 'none';
+                document.getElementById('password-container').style.display = 'flex';
+                document.getElementById('password-target-user').innerText = userObj.name;
+                document.getElementById('login-password-input').focus();
+            }
+        }
+
+        function verifyLoginPassword() {
+            const passInput = document.getElementById('login-password-input');
+            const errorMsg = document.getElementById('login-error-msg');
+            
+            if (selectedUserObj && passInput.value === selectedUserObj.password) {
+                loginSystem(selectedUserObj.name);
+            } else {
+                errorMsg.style.display = 'block';
+                passInput.value = '';
+                passInput.focus();
+            }
+        }
+
+        document.getElementById('password-back-btn').onclick = initLoginScreen;
+        document.getElementById('password-submit-btn').onclick = verifyLoginPassword;
+        document.getElementById('login-password-input').onkeypress = (e) => {
+            if (e.key === 'Enter') verifyLoginPassword();
+        };
+
+        function loginSystem(username) {
+            currentUser = username;
+            localStorage.setItem('os_current_user', username);
+            document.getElementById('current-user-name').innerText = currentUser;
+
+            const savedBg = loadUserData('bg_color');
+            const savedImg = loadUserData('bg_image');
+
+            document.body.style.backgroundColor = savedBg || '#ECEFF1';
+            if (savedImg) {
+                document.body.style.backgroundImage = `url('${savedImg}')`;
+            } else {
+                document.body.style.backgroundImage = '';
+            }
+
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('desktop').style.display = 'flex';
+            document.getElementById('taskbar').style.display = 'flex';
+        }
+
+        function logoutSystem() {
+            currentUser = null;
+            localStorage.removeItem('os_current_user');
+            
+            document.getElementById('desktop').style.display = 'none';
+            document.getElementById('taskbar').style.display = 'none';
+            document.getElementById('start-menu').style.display = 'none';
+            document.getElementById('login-screen').style.display = 'flex';
+            document.body.style.backgroundColor = '#ECEFF1';
+            document.body.style.backgroundImage = '';
+
+            document.querySelectorAll('.window').forEach(w => w.remove());
+            document.getElementById('taskbar-apps').innerHTML = '';
+            
+            initLoginScreen();
+        }
+
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').innerText = 
+                `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        function toggleStartMenu() {
+            const menu = document.getElementById('start-menu');
+            menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        document.addEventListener('click', (e) => {
+            const startBtn = document.getElementById('start-btn');
+            const startMenu = document.getElementById('start-menu');
+            if (startBtn && startMenu && !startBtn.contains(e.target) && !startMenu.contains(e.target)) {
+                startMenu.style.display = 'none';
+            }
+            document.getElementById('context-menu').style.display = 'none';
+        });
+
+        document.getElementById('desktop').addEventListener('contextmenu', (e) => {
+            if (e.target.id === 'desktop') {
+                e.preventDefault();
+                const cm = document.getElementById('context-menu');
+                cm.style.top = `${e.clientY}px`;
+                cm.style.left = `${e.clientX}px`;
+                cm.style.display = 'block';
+                document.getElementById('start-menu').style.display = 'none';
+            }
+        });
+        window.addEventListener('contextmenu', (e) => {
+            if (e.target.id !== 'desktop' && !e.target.closest('.app-browser-container')) {
+                e.preventDefault();
+            }
+        });
+
+        // --- Реестр Приложений ---
+        const AppRegistry = {
+            'explorer': {
+                icon: 'folder', title: 'Проводник', width: 650, height: 450, color: '#FFB300',
+                content: `
+                    <div style="padding: 16px; display: flex; flex-direction: column; height: 100%; box-sizing: border-box; background: #FAFAFA;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                            <h3 style="margin: 0; font-weight: 500; font-size: 18px; color: #37474F;">Локальное изолированное хранилище</h3>
+                            <span style="color: #009688; font-size: 13px; font-weight: 500; display: flex; align-items: center;"><span class="material-icons" style="font-size: 16px; margin-right: 4px;">lock</span> Строгая изоляция: включена</span>
+                        </div>
+                        <div style="flex-grow: 1; border: 1px solid #E0E0E0; border-radius: 2px; overflow-y: auto; background: #FFF;">
+                            <table class="explorer-table">
+                                <thead>
+                                    <tr>
+                                        <th>Имя файла</th>
+                                        <th>Тип</th>
+                                        <th>Размер</th>
+                                        <th>Дата добавления</th>
+                                        <th style="text-align: right; padding-right: 16px;">Действия</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="explorer-list-tbody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                `,
+                init: (win) => {
+                    const tbody = win.querySelector('#explorer-list-tbody');
+
+                    const renderFiles = () => {
+                        tbody.innerHTML = '';
+                        VFS.getFiles(currentUser).then(files => {
+                            if (files.length === 0) {
+                                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #757575; padding: 24px;">Хранилище пусто. Сохраняйте файлы из Блокнота или скачивайте через Браузер ОС.</td></tr>`;
+                                return;
+                            }
+                            files.forEach(file => {
+                                const tr = document.createElement('tr');
+                                let typeIcon = 'insert_drive_file';
+                                if (file.type.includes('image')) typeIcon = 'image';
+                                else if (file.type.includes('text') || file.name.endsWith('.txt')) typeIcon = 'description';
+                                else if (file.type.includes('zip') || file.type.includes('rar')) typeIcon = 'inventory_2';
+                                
+                                const sizeKb = (file.size / 1024).toFixed(1);
+
+                                tr.innerHTML = `
+                                    <td style="display: flex; align-items: center; gap: 8px; font-weight: 500;">
+                                        <span class="material-icons" style="color: #757575;">${typeIcon}</span>
+                                        <span style="max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${file.name}">${file.name}</span>
+                                    </td>
+                                    <td style="color: #757575; font-size: 13px;">${file.type.split('/')[1] || 'unknown'}</td>
+                                    <td>${sizeKb} КБ</td>
+                                    <td style="color: #757575; font-size: 13px;">${file.date}</td>
+                                    <td style="text-align: right; padding-right: 12px;">
+                                        <button class="exp-del-btn material-icons" data-id="${file.id}" style="background:transparent; color:#F44336; box-shadow:none; padding:4px;" title="Удалить безвозвратно">delete</button>
+                                    </td>
+                                `;
+                                tbody.appendChild(tr);
+                            });
+
+                            tbody.querySelectorAll('.exp-del-btn').forEach(btn => {
+                                btn.onclick = () => {
+                                    VFS.deleteFile(parseInt(btn.dataset.id)).then(() => renderFiles());
+                                };
+                            });
+                        });
+                    };
+
+                    renderFiles();
+                    
+                    const updateListener = () => renderFiles();
+                    window.addEventListener('vfs_changed', updateListener);
+                    win.addEventListener('close_window_event', () => {
+                        window.removeEventListener('vfs_changed', updateListener);
+                    });
+                }
+            },
+            'store': {
+                icon: 'storefront', title: 'Магазин приложений', width: 550, height: 450, color: '#E91E63',
+                content: `
+                    <div style="padding: 24px; display: flex; flex-direction: column; height: 100%; box-sizing: border-box; background: #FAFAFA;">
+                        <h3 style="margin-top: 0; font-weight: 500; font-size: 20px; color: #212121; margin-bottom: 4px;">Каталог Inblelt Store</h3>
+                        <p style="color: #757575; margin-bottom: 16px; font-size: 13px; margin-top: 0;">Сканирование репозитория: lastochka-app/inblelt-store</p>
+                        <div id="store-loader" style="text-align: center; padding: 48px; color: #757575; font-size: 15px;">
+                            <span class="material-icons" style="animation: spin 1.5s linear infinite; font-size: 32px; vertical-align: middle; margin-right: 12px; color: #E91E63;">refresh</span> Загрузка приложений...
+                        </div>
+                        <ul class="task-list" id="store-apps-list" style="display: none; flex-grow: 1; overflow-y: auto; background: #FFFFFF; border: 1px solid #E0E0E0;"></ul>
+                    </div>
+                `,
+                init: (win) => {
+                    const loader = win.querySelector('#store-loader');
+                    const list = win.querySelector('#store-apps-list');
+
+                    fetch('https://api.github.com/repos/lastochka-app/inblelt-store/contents/')
+                        .then(res => {
+                            if (!res.ok) throw new Error('Не удалось связаться с репозиторием GitHub API');
+                            return res.json();
+                        })
+                        .then(data => {
+                            loader.style.display = 'none';
+                            list.style.display = 'block';
+                            list.innerHTML = '';
+
+                            const icappFiles = data.filter(item => item.name.toLowerCase().endsWith('.icapp') && item.type === 'file');
+
+                            if (icappFiles.length === 0) {
+                                list.innerHTML = '<li class="task-item" style="color: #757575; justify-content: center;">Нет доступных пакетов .icapp в корне репозитория</li>';
+                                return;
+                            }
+
+                            icappFiles.forEach(file => {
+                                const li = document.createElement('li');
+                                li.className = 'task-item';
+                                const appDisplayName = file.name.replace(/\.icapp$/i, '');
+                                
+                                li.innerHTML = `
+                                    <div style="display:flex; align-items:center; gap:12px;">
+                                        <span class="material-icons" style="color: #E91E63; font-size: 28px;">extension</span>
+                                        <div style="display:flex; flex-direction:column;">
+                                            <span style="font-size:16px; font-weight:500; color:#212121;">${appDisplayName}</span>
+                                            <span style="font-size:12px; color:#757575;">Размер: ${(file.size / 1024).toFixed(1)} КБ</span>
+                                        </div>
+                                    </div>
+                                    <button class="store-install-btn" data-url="${file.download_url}" data-name="${appDisplayName}" style="background: #E91E63;">Установить</button>
+                                `;
+                                list.appendChild(li);
+                            });
+
+                            list.querySelectorAll('.store-install-btn').forEach(btn => {
+                                btn.addEventListener('click', () => {
+                                    const fileUrl = btn.dataset.url;
+                                    const appName = btn.dataset.name;
+                                    
+                                    btn.disabled = true;
+                                    btn.innerText = 'Загрузка...';
+
+                                    fetch(fileUrl)
+                                        .then(r => { if (!r.ok) throw new Error('Ошибка скачивания файла'); return r.arrayBuffer(); })
+                                        .then(buffer => {
+                                            btn.innerText = 'Сборка...';
+                                            return JSZip.loadAsync(buffer);
+                                        })
+                                        .then(zip => {
+                                            const manifestFile = zip.file("manifest.json");
+                                            const htmlFile = zip.file("index.html");
+
+                                            if (!manifestFile || !htmlFile) {
+                                                throw new Error("Ошибка структуры: архив должен содержать manifest.json и index.html");
+                                            }
+
+                                            return Promise.all([manifestFile.async("string"), htmlFile.async("string")])
+                                                .then(results => ({ zip, manifest: JSON.parse(results[0]), htmlContent: results[1] }));
+                                        })
+                                        .then(({ zip, manifest, htmlContent }) => {
+                                            const appId = manifest.id || 'app_' + Date.now();
+                                            const cssFile = zip.file("style.css");
+                                            const jsFile = zip.file("script.js");
+                                            const filePromises = [];
+                                            let finalHtml = htmlContent;
+
+                                            if (cssFile) {
+                                                filePromises.push(cssFile.async("string").then(css => {
+                                                    if (finalHtml.includes('</head>')) finalHtml = finalHtml.replace('</head>', `<style>${css}</style></head>`);
+                                                    else finalHtml = `<style>${css}</style>` + finalHtml;
+                                                }));
+                                            }
+                                            if (jsFile) {
+                                                filePromises.push(jsFile.async("string").then(js => {
+                                                    if (finalHtml.includes('</body>')) finalHtml = finalHtml.replace('</body>', `<script>${js}<\/script></body>`);
+                                                    else finalHtml = finalHtml + `<script>${js}<\/script>`;
+                                                }));
+                                            }
+
+                                            return Promise.all(filePromises).then(() => {
+                                                installedApps[appId] = {
+                                                    title: manifest.title || appName,
+                                                    icon: manifest.icon || 'extension',
+                                                    color: manifest.color || '#9C27B0',
+                                                    width: manifest.width || 500,
+                                                    height: manifest.height || 400,
+                                                    htmlContent: finalHtml
+                                                };
+
+                                                localStorage.setItem('os_installed_apps', JSON.stringify(installedApps));
+                                                registerSingleCustomApp(appId, installedApps[appId]);
+                                                renderCustomDesktopIcons();
+
+                                                btn.innerText = 'Готово';
+                                                btn.style.background = '#4CAF50';
+                                                alert(`Приложение "${manifest.title || appName}" успешно установлено из Магазина!`);
+                                            });
+                                        })
+                                        .catch(err => {
+                                            alert("Не удалось установить приложение: " + err.message);
+                                            btn.disabled = false;
+                                            btn.innerText = 'Установить';
+                                        });
+                                });
+                            });
+                        })
+                        .catch(err => {
+                            loader.innerHTML = `<span class="material-icons" style="color:#F44336; vertical-align:middle; margin-right:8px;">error</span> Ошибка подключения: ${err.message}`;
+                        });
+                }
+            },
+            'tasks': {
+                icon: 'task_alt', title: 'Задачи', width: 450, height: 500, color: '#2196F3',
+                content: `
+                    <div class="app-tasks">
+                        <div class="task-input-row">
+                            <input type="text" id="new-task-input" placeholder="Новая задача...">
+                            <button id="add-task-btn">Добавить</button>
+                        </div>
+                        <ul class="task-list" id="task-list"></ul>
+                    </div>
+                `,
+                init: (win) => {
+                    const input = win.querySelector('#new-task-input');
+                    const btn = win.querySelector('#add-task-btn');
+                    const list = win.querySelector('#task-list');
+                    let tasks = JSON.parse(loadUserData('tasks') || '[]');
+
+                    const saveTasks = () => saveUserData('tasks', JSON.stringify(tasks));
+
+                    const renderTasks = () => {
+                        list.innerHTML = '';
+                        tasks.forEach((t, i) => {
+                            const li = document.createElement('li');
+                            li.className = `task-item ${t.completed ? 'completed' : ''}`;
+                            li.innerHTML = `
+                                <label style="display:flex; align-items:center; gap:16px; cursor:pointer; flex-grow:1;">
+                                    <input type="checkbox" ${t.completed ? 'checked' : ''} data-index="${i}">
+                                    <span style="font-size:16px;">${t.text}</span>
+                                </label>
+                                <button class="material-icons" data-index="${i}" style="font-size:20px;">delete</button>
+                            `;
+                            list.appendChild(li);
+                        });
+                    };
+
+                    list.addEventListener('change', (e) => {
+                        if(e.target.tagName === 'INPUT') {
+                            tasks[e.target.dataset.index].completed = e.target.checked;
+                            saveTasks(); renderTasks();
+                        }
+                    });
+
+                    list.addEventListener('click', (e) => {
+                        if(e.target.tagName === 'BUTTON') {
+                            tasks.splice(e.target.dataset.index, 1);
+                            saveTasks(); renderTasks();
+                        }
+                    });
+
+                    const addTask = () => {
+                        const text = input.value.trim();
+                        if(text) { tasks.push({ text, completed: false }); input.value = ''; saveTasks(); renderTasks(); }
+                    };
+
+                    btn.addEventListener('click', addTask);
+                    input.addEventListener('keypress', (e) => { if(e.key === 'Enter') addTask(); });
+                    renderTasks();
+                }
+            },
+            'notepad': {
+                icon: 'description', title: 'Блокнот', width: 500, height: 400, color: '#FF9800',
+                content: `
+                    <div style="display: flex; flex-direction: column; height: 100%; background: #FAFAFA;">
+                        <div style="padding: 8px 16px; background: #EEEEEE; display: flex; gap: 8px; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); z-index: 2;">
+                            <input type="text" id="np-filename" value="Новый_документ.txt" style="flex-grow: 1; padding: 4px 8px; font-size: 14px; border: 1px solid #CFD8DC; border-radius: 2px; outline: none;">
+                            <button id="np-save-vfs" style="background: #FF9800; color: white; padding: 6px 16px; font-size: 13px;">СОХРАНИТЬ В ПРОВОДНИК</button>
+                        </div>
+                        <textarea class="app-notepad" placeholder="Начните вводить текст..." style="flex-grow: 1; border: none; padding: 16px; resize: none; outline: none;"></textarea>
+                    </div>
+                `,
+                init: (win) => {
+                    const ta = win.querySelector('.app-notepad');
+                    const filenameInput = win.querySelector('#np-filename');
+                    const saveBtn = win.querySelector('#np-save-vfs');
+                    
+                    ta.value = loadUserData('notepad_text') || ''; 
+                    ta.addEventListener('input', () => saveUserData('notepad_text', ta.value));
+
+                    saveBtn.addEventListener('click', () => {
+                        const name = filenameInput.value.trim() || 'Без_имени.txt';
+                        const text = ta.value;
+                        const blob = new Blob([text], { type: 'text/plain' });
+                        VFS.addFile(currentUser, name, 'text/plain', blob).then(() => {
+                            alert(`Файл "${name}" успешно сохранен в изолированный Проводник!`);
+                        });
+                    });
+                } 
+            },
+            'browser': {
+                icon: 'language', title: 'Обозреватель', width: 850, height: 600, color: '#F44336',
+                content: `
+                    <div class="app-browser-container">
+                        <div class="app-browser-tabs-container">
+                            <div class="browser-tabs"></div>
+                            <button class="browser-new-tab material-icons" style="background: transparent; color: #FFF; box-shadow: none; padding: 4px; margin-bottom: 4px;" title="Новая вкладка">add</button>
+                        </div>
+                        <div class="app-browser-bar">
+                            <button class="browser-refresh material-icons" style="background: transparent; color: #757575; box-shadow: none; padding: 4px;" title="Обновить">refresh</button>
+                            <input type="text" class="browser-url" placeholder="Введите веб-адрес...">
+                            <button class="browser-go" style="background:#F44336;">Перейти</button>
+                            <button class="browser-dl-file material-icons" style="background: #009688; color: white; margin-left: 4px; padding: 6px; font-size: 20px; border-radius: 2px;" title="Скачать этот URL в Проводник ОС">file_download</button>
+                        </div>
+                        <div class="browser-frames-container"></div>
+                    </div>
+                `,
+                init: (win) => {
+                    const tabsContainer = win.querySelector('.browser-tabs');
+                    const framesContainer = win.querySelector('.browser-frames-container');
+                    const newTabBtn = win.querySelector('.browser-new-tab');
+                    const urlInput = win.querySelector('.browser-url');
+                    const goBtn = win.querySelector('.browser-go');
+                    const refreshBtn = win.querySelector('.browser-refresh');
+                    const dlBtn = win.querySelector('.browser-dl-file');
+
+                    let tabs = []; let activeTabId = null; let tabCounter = 0;
+
+                    const getHostName = (url) => { try { return new URL(url).hostname; } catch(e) { return url; } };
+
+                    const createTab = (url = 'https://ru.wikipedia.org/wiki/Заглавная_страница') => {
+                        const id = 'tab_' + (++tabCounter) + '_' + Date.now();
+                        const tabEl = document.createElement('div');
+                        tabEl.className = 'browser-tab';
+                        tabEl.innerHTML = `<span class="tab-title">Загрузка...</span><span class="material-icons close-tab">close</span>`;
+                        const iframeEl = document.createElement('iframe');
+                        iframeEl.className = 'browser-iframe'; iframeEl.src = url;
+
+                        tabsContainer.appendChild(tabEl); framesContainer.appendChild(iframeEl);
+                        tabs.push({ id, url, tabEl, iframeEl });
+
+                        tabEl.addEventListener('mousedown', (e) => {
+                            if (e.target.classList.contains('close-tab') || e.button === 1) closeTab(id);
+                            else switchTab(id);
+                        });
+
+                        iframeEl.addEventListener('load', () => {
+                            const t = tabs.find(t => t.id === id);
+                            if(t) {
+                                t.url = iframeEl.src;
+                                tabEl.querySelector('.tab-title').textContent = getHostName(iframeEl.src);
+                                tabEl.title = iframeEl.src;
+                                if (activeTabId === id) urlInput.value = iframeEl.src;
+                            }
+                        });
+                        switchTab(id);
+                    };
+
+                    const switchTab = (id) => {
+                        activeTabId = id;
+                        tabs.forEach(tab => {
+                            if (tab.id === id) {
+                                tab.tabEl.classList.add('active'); tab.iframeEl.classList.add('active');
+                                urlInput.value = tab.iframeEl.src !== 'about:blank' ? tab.iframeEl.src : tab.url;
+                            } else {
+                                tab.tabEl.classList.remove('active'); tab.iframeEl.classList.remove('active');
+                            }
+                        });
+                    };
+
+                    const closeTab = (id) => {
+                        const tabIndex = tabs.findIndex(t => t.id === id);
+                        if (tabIndex > -1) {
+                            tabs[tabIndex].tabEl.remove(); tabs[tabIndex].iframeEl.remove();
+                            tabs.splice(tabIndex, 1);
+                            if (tabs.length === 0) createTab(); 
+                            else if (activeTabId === id) switchTab(tabs[Math.max(0, tabIndex - 1)].id);
+                        }
+                    };
+
+                    const navigate = () => {
+                        let url = urlInput.value.trim();
+                        if (!url) return;
+                        if (!url.startsWith('http://') && !url.startsWith('https://')) url = 'https://' + url;
+                        const activeTab = tabs.find(t => t.id === activeTabId);
+                        if (activeTab) { activeTab.iframeEl.src = url; activeTab.url = url; activeTab.tabEl.querySelector('.tab-title').textContent = 'Загрузка...'; }
+                    };
+
+                    goBtn.addEventListener('click', navigate);
+                    urlInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') navigate(); });
+                    refreshBtn.addEventListener('click', () => { const t = tabs.find(t => t.id === activeTabId); if (t) t.iframeEl.src = t.iframeEl.src; });
+                    newTabBtn.addEventListener('click', () => createTab('https://ya.ru/'));
+
+                    // Реализация изоляции скачивания файлов
+                    dlBtn.addEventListener('click', () => {
+                        let url = urlInput.value.trim();
+                        if (!url || url.includes('wikipedia.org/wiki')) {
+                            alert("Пожалуйста, укажите прямую ссылку на конкретный скачиваемый файл в адресной строке.");
+                            return;
+                        }
+                        
+                        dlBtn.innerText = 'hourglass_empty';
+                        dlBtn.disabled = true;
+
+                        fetch(url)
+                            .then(res => {
+                                if (!res.ok) throw new Error("Ошибка ответа сервера");
+                                return res.blob().then(blob => ({ blob, type: res.headers.get('content-type') }));
+                            })
+                            .then(({ blob, type }) => {
+                                let filename = url.substring(url.lastIndexOf('/') + 1) || 'downloaded_file';
+                                if (filename.includes('?')) filename = filename.split('?')[0];
+                                
+                                VFS.addFile(currentUser, filename, type, blob).then(() => {
+                                    alert(`Файл "${filename}" успешно загружен в кэш Проводника веб-ОС!`);
+                                });
+                            })
+                            .catch(err => {
+                                console.warn("Запрос заблокирован CORS политикой реального сайта. Эмулируем скачивание тестового файла...");
+                                let mockData = `Содержимое веб-документа с адреса: ${url}\nСкачано: ${new Date().toLocaleString()}\nСистема безопасности: Файл изолирован от хост-компьютера.`;
+                                let mockBlob = new Blob([mockData], { type: 'text/plain' });
+                                let filename = url.substring(url.lastIndexOf('/') + 1) || 'web_document.txt';
+                                if (!filename.includes('.')) filename += '.txt';
+                                
+                                VFS.addFile(currentUser, filename, 'text/plain', mockBlob).then(() => {
+                                    alert(`Из-за CORS ограничений сети интернет сгенерирован изолированный слепок файла "${filename}" и помещен в Проводник!`);
+                                });
+                            })
+                            .finally(() => {
+                                dlBtn.innerText = 'file_download';
+                                dlBtn.disabled = false;
+                            });
+                    });
+
+                    createTab();
+                }
+            },
+            'terminal': {
+                icon: 'terminal', title: 'Терминал', width: 550, height: 350, color: '#37474F',
+                content: `
+                    <div class="app-terminal">
+                        <div class="app-terminal-output" id="term-out">InbleltOS [Version 1.0]<br><br></div>
+                        <div class="app-terminal-input-row">
+                            <span id="term-prompt"></span>
+                            <input type="text" id="term-in" class="app-terminal-input" autocomplete="off">
+                        </div>
+                    </div>
+                `,
+                init: (win) => {
+                    const input = win.querySelector('#term-in');
+                    const output = win.querySelector('#term-out');
+                    win.querySelector('#term-prompt').innerText = `${currentUser}@inblelt:~$`;
+                    input.focus();
+                    input.addEventListener('keypress', (e) => {
+                        if(e.key === 'Enter') {
+                            const val = input.value.trim();
+                            output.innerHTML += `<div>${currentUser}@inblelt:~$ ${val}</div>`;
+                            input.value = '';
+                            if(val === 'help') output.innerHTML += `<div>Доступно: help, date, clear, calc, store, explorer, exit</div>`;
+                            else if(val === 'date') output.innerHTML += `<div>${new Date().toString()}</div>`;
+                            else if(val === 'clear') output.innerHTML = 'InbleltOS [Version 1.0]<br><br>';
+                            else if(val === 'calc') launchApp('calculator');
+                            else if(val === 'store') launchApp('store');
+                            else if(val === 'explorer') launchApp('explorer');
+                            else if(val === 'exit') logoutSystem();
+                            else if(val !== '') output.innerHTML += `<div>Команда не найдена: ${val}</div>`;
+                            output.scrollTop = output.scrollHeight;
+                        }
+                    });
+                }
+            },
+            'calculator': {
+                icon: 'calculate', title: 'Калькулятор', width: 320, height: 460, color: '#673AB7',
+                content: `
+                    <div class="app-calc">
+                        <div class="app-calc-display" id="calc-display">0</div>
+                        <div class="app-calc-grid">
+                            <button class="app-calc-btn" onclick="calcInput('7')">7</button>
+                            <button class="app-calc-btn" onclick="calcInput('8')">8</button>
+                            <button class="app-calc-btn" onclick="calcInput('9')">9</button>
+                            <button class="app-calc-btn op" onclick="calcOp('/')">÷</button>
+                            
+                            <button class="app-calc-btn" onclick="calcInput('4')">4</button>
+                            <button class="app-calc-btn" onclick="calcInput('5')">5</button>
+                            <button class="app-calc-btn" onclick="calcInput('6')">6</button>
+                            <button class="app-calc-btn op" onclick="calcOp('*')">×</button>
+                            
+                            <button class="app-calc-btn" onclick="calcInput('1')">1</button>
+                            <button class="app-calc-btn" onclick="calcInput('2')">2</button>
+                            <button class="app-calc-btn" onclick="calcInput('3')">3</button>
+                            <button class="app-calc-btn op" onclick="calcOp('-')">-</button>
+                            
+                            <button class="app-calc-btn" onclick="calcInput('C')">C</button>
+                            <button class="app-calc-btn" onclick="calcInput('0')">0</button>
+                            <button class="app-calc-btn op" onclick="calcOp('+')">+</button>
+                            <button class="app-calc-btn equal" onclick="calcEval()" style="background:#673AB7;">=</button>
+                        </div>
+                    </div>
+                `,
+                init: (win) => {
+                    if(!window.calcInitialized) {
+                        window.calcVal = '0';
+                        window.calcInput = (v) => {
+                            const d = document.getElementById('calc-display');
+                            if(!d) return;
+                            if(v === 'C') window.calcVal = '0';
+                            else if(window.calcVal === '0' || window.calcVal === 'Error') window.calcVal = v;
+                            else window.calcVal += v;
+                            d.innerText = window.calcVal;
+                        };
+                        window.calcOp = (op) => {
+                            const d = document.getElementById('calc-display');
+                            if(window.calcVal !== 'Error') window.calcVal += op;
+                            d.innerText = window.calcVal;
+                        };
+                        window.calcEval = () => {
+                            const d = document.getElementById('calc-display');
+                            try { window.calcVal = String(eval(window.calcVal)); } catch(e) { window.calcVal = 'Error'; }
+                            d.innerText = window.calcVal;
+                        };
+                        window.calcInitialized = true;
+                    }
+                }
+            },
+            'settings': {
+                icon: 'settings', title: 'Настройки', width: 450, height: 530, color: '#607D8B',
+                content: `
+                    <div class="app-settings">
+                        <div class="settings-nav">
+                            <button class="settings-tab-btn active" data-target="settings-theme">Оформление</button>
+                            <button class="settings-tab-btn" data-target="settings-users">Аккаунты</button>
+                            <button class="settings-tab-btn" data-target="settings-apps">Приложения</button>
+                        </div>
+                        <div class="settings-content">
+                            <div id="settings-theme" class="settings-section active">
+                                <h3>Оформление стола</h3>
+                                <p style="color: #757575; font-size: 14px;">Цвет и обои применяются для профиля <b><span class="set-curr-user"></span></b>.</p>
+                                
+                                <div class="color-picker-row">
+                                    <label style="flex-grow: 1; font-size: 16px;">Основной цвет фона</label>
+                                    <input type="color" id="bg-color-picker">
+                                </div>
+                                
+                                <h4 style="margin-top: 24px; margin-bottom: 8px; color: #212121; font-weight: 500; font-size: 16px;">Обои рабочего стола</h4>
+                                <div id="wallpaper-grid" style="display: flex; gap: 12px; flex-wrap: wrap;">
+                                    <div class="wallpaper-thumb" data-url="" style="width: 80px; height: 50px; background: #ECEFF1; border: 2px solid #CFD8DC; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #757575;" title="Без обоев"><span class="material-icons" style="font-size: 20px;">block</span></div>
+                                    <div class="wallpaper-thumb" data-url="https://images.unsplash.com/photo-1506744626753-dba7d41543f4?auto=format&fit=crop&w=1920&q=80" style="width: 80px; height: 50px; background: url('https://images.unsplash.com/photo-1506744626753-dba7d41543f4?auto=format&fit=crop&w=200&q=80') center/cover; border: 2px solid transparent; border-radius: 4px; cursor: pointer;" title="Природа"></div>
+                                    <div class="wallpaper-thumb" data-url="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=1920&q=80" style="width: 80px; height: 50px; background: url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=200&q=80') center/cover; border: 2px solid transparent; border-radius: 4px; cursor: pointer;" title="Абстракция"></div>
+                                    <div class="wallpaper-thumb" data-url="https://images.unsplash.com/photo-1538370965046-79c0d6907d47?auto=format&fit=crop&w=1920&q=80" style="width: 80px; height: 50px; background: url('https://images.unsplash.com/photo-1538370965046-79c0d6907d47?auto=format&fit=crop&w=200&q=80') center/cover; border: 2px solid transparent; border-radius: 4px; cursor: pointer;" title="Космос"></div>
+                                    <div class="wallpaper-thumb" data-url="https://images.unsplash.com/photo-1493246507139-91e8fad9978e?auto=format&fit=crop&w=1920&q=80" style="width: 80px; height: 50px; background: url('https://images.unsplash.com/photo-1493246507139-91e8fad9978e?auto=format&fit=crop&w=200&q=80') center/cover; border: 2px solid transparent; border-radius: 4px; cursor: pointer;" title="Горы"></div>
+                                </div>
+
+                                <div style="margin-top: 24px;">
+                                    <button id="reset-bg-btn" style="background: transparent; color: #607D8B; box-shadow: none;">СБРОСИТЬ ВСЕ</button>
+                                </div>
+                            </div>
+                            
+                            <div id="settings-users" class="settings-section">
+                                <h3>Управление пользователями</h3>
+                                <p style="color: #757575; margin-bottom: 16px;">Текущий профиль: <b><span class="set-curr-user"></span></b></p>
+                                
+                                <ul class="task-list" id="settings-users-list" style="margin-bottom: 16px; border: 1px solid #E0E0E0; max-height: 160px;"></ul>
+                                
+                                <div class="task-input-row" style="margin-bottom:0; flex-direction: column; gap: 8px; align-items: stretch;">
+                                    <input type="text" id="new-user-input" placeholder="Имя нового пользователя">
+                                    <input type="password" id="new-user-pass" placeholder="Пароль (пусто — без пароля)">
+                                    <button id="add-user-btn" style="background: #009688; align-self: flex-end; margin-top: 4px;">Добавить</button>
+                                </div>
+                            </div>
+
+                            <div id="settings-apps" class="settings-section">
+                                <h3>Установленные программы</h3>
+                                <p style="color: #757575; margin-bottom: 12px;">Здесь отображаются все сторонние расширения, загруженные из официального Магазина.</p>
+                                <ul class="task-list" id="settings-apps-list" style="border: 1px solid #E0E0E0; max-height: 260px; overflow-y:auto;"></ul>
+                            </div>
+                        </div>
+                    </div>
+                `,
+                init: (win) => {
+                    const tabBtns = win.querySelectorAll('.settings-tab-btn');
+                    const sections = win.querySelectorAll('.settings-section');
+                    
+                    tabBtns.forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            tabBtns.forEach(b => b.classList.remove('active'));
+                            sections.forEach(s => s.classList.remove('active'));
+                            btn.classList.add('active');
+                            win.querySelector(`#${btn.dataset.target}`).classList.add('active');
+                        });
+                    });
+
+                    win.querySelectorAll('.set-curr-user').forEach(el => el.innerText = currentUser);
+
+                    // Управление фоном (Цвет)
+                    const colorPicker = win.querySelector('#bg-color-picker');
+                    const resetBtn = win.querySelector('#reset-bg-btn');
+                    colorPicker.value = loadUserData('bg_color') || '#ECEFF1';
+
+                    colorPicker.addEventListener('input', (e) => {
+                        const color = e.target.value;
+                        document.body.style.backgroundColor = color;
+                        saveUserData('bg_color', color);
+                    });
+
+                    // Управление обоями
+                    const wallpaperThumbs = win.querySelectorAll('.wallpaper-thumb');
+                    const applyWallpaper = (url) => {
+                        if (url) {
+                            document.body.style.backgroundImage = `url('${url}')`;
+                        } else {
+                            document.body.style.backgroundImage = '';
+                        }
+                        saveUserData('bg_image', url);
+                        
+                        wallpaperThumbs.forEach(t => t.style.borderColor = (t.dataset.url === url) ? '#009688' : 'transparent');
+                        if(!url) wallpaperThumbs[0].style.borderColor = '#CFD8DC';
+                    };
+
+                    const savedImg = loadUserData('bg_image') || '';
+                    applyWallpaper(savedImg);
+
+                    wallpaperThumbs.forEach(thumb => {
+                        thumb.addEventListener('click', () => {
+                            applyWallpaper(thumb.dataset.url);
+                        });
+                    });
+
+                    // Сброс настроек
+                    resetBtn.addEventListener('click', () => {
+                        localStorage.removeItem(getUserKey('bg_color'));
+                        localStorage.removeItem(getUserKey('bg_image'));
+                        document.body.style.backgroundColor = '#ECEFF1';
+                        colorPicker.value = '#ECEFF1';
+                        applyWallpaper('');
+                    });
+
+                    // Управление пользователями
+                    const usersListContainer = win.querySelector('#settings-users-list');
+                    const newUserInput = win.querySelector('#new-user-input');
+                    const newUserPass = win.querySelector('#new-user-pass');
+                    const addUserBtn = win.querySelector('#add-user-btn');
+
+                    const renderSettingsUsers = () => {
+                        usersListContainer.innerHTML = '';
+                        usersList.forEach(u => {
+                            const li = document.createElement('li');
+                            li.className = 'task-item';
+                            const isCurrent = u.name === currentUser;
+                            li.innerHTML = `
+                                <div style="display:flex; align-items:center; gap:12px;">
+                                    <span class="material-icons" style="color: ${isCurrent ? '#009688' : '#9E9E9E'}">account_circle</span>
+                                    <span style="font-size:16px; font-weight: ${isCurrent ? '500' : '400'}">${u.name}</span>
+                                    ${u.password ? '<span class="material-icons" style="font-size: 16px; color: #757575;" title="Защищен паролем">lock</span>' : ''}
+                                </div>
+                                ${!isCurrent ? `<button class="delete-user-btn" data-user="${u.name}" style="background:transparent; color:#F44336; box-shadow:none;">УДАЛИТЬ</button>` : ''}
+                            `;
+                            usersListContainer.appendChild(li);
+                        });
+                    };
+
+                    usersListContainer.addEventListener('click', (e) => {
+                        if(e.target.classList.contains('delete-user-btn')) {
+                            const uName = e.target.dataset.user;
+                            usersList = usersList.filter(user => user.name !== uName);
+                            localStorage.setItem('os_users_list', JSON.stringify(usersList));
+                            renderSettingsUsers();
+                            initLoginScreen(); 
+                        }
+                    });
+
+                    const addNewUser = () => {
+                        const name = newUserInput.value.trim();
+                        const password = newUserPass.value;
+                        if (name && !usersList.some(user => user.name === name)) {
+                            usersList.push({ name, password });
+                            localStorage.setItem('os_users_list', JSON.stringify(usersList));
+                            newUserInput.value = '';
+                            newUserPass.value = '';
+                            renderSettingsUsers();
+                            initLoginScreen();
+                        }
+                    };
+
+                    addUserBtn.addEventListener('click', addNewUser);
+                    newUserInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') addNewUser(); });
+                    newUserPass.addEventListener('keypress', (e) => { if (e.key === 'Enter') addNewUser(); });
+
+                    renderSettingsUsers();
+
+                    // Управление приложениями
+                    const appsListContainer = win.querySelector('#settings-apps-list');
+
+                    const renderInstalledAppsList = () => {
+                        appsListContainer.innerHTML = '';
+                        const appKeys = Object.keys(installedApps);
+                        if (appKeys.length === 0) {
+                            appsListContainer.innerHTML = '<li class="task-item" style="color: #757575;">Нет установленных приложений</li>';
+                            return;
+                        }
+                        appKeys.forEach(id => {
+                            const app = installedApps[id];
+                            const li = document.createElement('li');
+                            li.className = 'task-item';
+                            li.innerHTML = `
+                                <div style="display:flex; align-items:center; gap:12px;">
+                                    <span class="material-icons" style="color: ${app.color || '#9C27B0'}">${app.icon || 'extension'}</span>
+                                    <span style="font-size:16px;">${app.title} [${id}]</span>
+                                </div>
+                                <button class="delete-app-btn" data-appid="${id}" style="background:transparent; color:#F44336; box-shadow:none;">УДАЛИТЬ</button>
+                            `;
+                            appsListContainer.appendChild(li);
+                        });
+                    };
+
+                    appsListContainer.addEventListener('click', (e) => {
+                        if(e.target.classList.contains('delete-app-btn')) {
+                            const id = e.target.dataset.appid;
+                            delete installedApps[id];
+                            localStorage.setItem('os_installed_apps', JSON.stringify(installedApps));
+                            delete AppRegistry[id];
+                            renderInstalledAppsList();
+                            renderCustomDesktopIcons();
+                        }
+                    });
+
+                    renderInstalledAppsList();
+                }
+            }
+        };
+
+        function registerSingleCustomApp(appId, appData) {
+            AppRegistry[appId] = {
+                icon: appData.icon || 'extension',
+                title: appData.title || appId,
+                width: appData.width || 500,
+                height: appData.height || 400,
+                color: appData.color || '#9C27B0',
+                content: `<iframe id="app-frame-${appId}" style="width:100%; height:100%; border:none; background:#ffffff;"></iframe>`,
+                init: (win) => {
+                    const frame = win.querySelector(`#app-frame-${appId}`);
+                    if (frame) {
+                        const blob = new Blob([appData.htmlContent], { type: 'text/html' });
+                        frame.src = URL.createObjectURL(blob);
+                        
+                        frame.onload = () => {
+                            try {
+                                if (frame.contentWindow) {
+                                    frame.contentWindow.alert = window.alert;
+                                }
+                            } catch(e) { 
+                                console.warn("Не удалось привязать alert фрейма:", e); 
+                            }
+                        };
+                    }
+                }
+            };
+        }
+
+        function renderCustomDesktopIcons() {
+            document.querySelectorAll('.desktop-icon.custom-app').forEach(el => el.remove());
+            const desktop = document.getElementById('desktop');
+            Object.keys(installedApps).forEach(appId => {
+                const app = installedApps[appId];
+                const iconEl = document.createElement('div');
+                iconEl.className = 'desktop-icon custom-app';
+                iconEl.setAttribute('onclick', `launchApp('${appId}')`);
+                iconEl.innerHTML = `
+                    <span class="material-icons" style="color: ${app.color || '#9C27B0'};">${app.icon || 'extension'}</span>
+                    <span>${app.title}</span>
+                `;
+                desktop.appendChild(iconEl);
+            });
+        }
+
+        function initInstalledApps() {
+            Object.keys(installedApps).forEach(appId => {
+                registerSingleCustomApp(appId, installedApps[appId]);
+            });
+            renderCustomDesktopIcons();
+        }
+
+        function launchApp(appId) {
+            const app = AppRegistry[appId];
+            if(!app) return;
+
+            document.getElementById('start-menu').style.display = 'none';
+
+            const windowEl = document.createElement('div');
+            windowEl.className = 'window';
+            
+            const openedWindows = document.querySelectorAll('.window').length;
+            const offset = 40 + (openedWindows * 30);
+            windowEl.style.top = `${offset}px`;
+            windowEl.style.left = `${offset}px`;
+            windowEl.style.width = `${app.width}px`;
+            windowEl.style.height = `${app.height}px`;
+
+            windowEl.innerHTML = `
+                <div class="title-bar" style="background-color: ${app.color};">
+                    <div class="title-info"><span class="material-icons">${app.icon}</span> ${app.title}</div>
+                    <div class="window-controls">
+                        <span class="material-icons minimize-btn" title="Свернуть">remove</span>
+                        <span class="material-icons maximize-btn" title="Развернуть">crop_square</span>
+                        <span class="material-icons close-btn" title="Закрыть">close</span>
+                    </div>
+                </div>
+                <div class="window-content">${app.content}</div>
+            `;
+
+            const tbItem = document.createElement('div');
+            tbItem.className = 'taskbar-item active';
+            tbItem.innerHTML = `<span class="material-icons" style="color: ${app.color};">${app.icon}</span> ${app.title}`;
+            document.getElementById('taskbar-apps').appendChild(tbItem);
+
+            const bringToFront = () => {
+                highestZIndex++;
+                windowEl.style.zIndex = highestZIndex;
+                document.querySelectorAll('.taskbar-item').forEach(el => el.classList.remove('active'));
+                tbItem.classList.add('active');
+            };
+
+            bringToFront();
+            windowEl.addEventListener('mousedown', bringToFront);
+
+            windowEl.querySelector('.minimize-btn').onclick = (e) => {
+                e.stopPropagation();
+                windowEl.style.opacity = '0';
+                setTimeout(() => { windowEl.style.display = 'none'; windowEl.style.opacity = '1'; }, 200);
+                tbItem.classList.remove('active');
+            };
+
+            let isMaximized = false; let preMaxTransform = '';
+            const maxBtn = windowEl.querySelector('.maximize-btn');
+            maxBtn.onclick = (e) => {
+                e.stopPropagation();
+                isMaximized = !isMaximized;
+                if (isMaximized) {
+                    preMaxTransform = windowEl.style.transform;
+                    windowEl.style.transform = 'none'; windowEl.classList.add('maximized'); maxBtn.innerText = 'filter_none';
+                } else {
+                    windowEl.classList.remove('maximized'); windowEl.style.transform = preMaxTransform; maxBtn.innerText = 'crop_square';
+                }
+                bringToFront();
+            };
+
+            windowEl.querySelector('.close-btn').onclick = (e) => {
+                e.stopPropagation(); windowEl.style.opacity = '0'; windowEl.style.transform = 'scale(0.9)';
+                windowEl.dispatchEvent(new CustomEvent('close_window_event'));
+                setTimeout(() => { windowEl.remove(); tbItem.remove(); }, 200);
+            };
+
+            tbItem.onclick = () => {
+                if (windowEl.style.display === 'none') { windowEl.style.display = 'flex'; bringToFront(); } 
+                else {
+                    if (windowEl.style.zIndex == highestZIndex) {
+                        windowEl.style.opacity = '0'; setTimeout(() => { windowEl.style.display = 'none'; windowEl.style.opacity = '1'; }, 200);
+                        tbItem.classList.remove('active');
+                    } else bringToFront();
+                }
+            };
+
+            const titleBar = windowEl.querySelector('.title-bar');
+            let isDragging = false; let currentX, currentY, initialX, initialY; let xOffset = 0, yOffset = 0;
+
+            titleBar.addEventListener('mousedown', (e) => {
+                if (windowEl.classList.contains('maximized')) return;
+                initialX = e.clientX - xOffset; initialY = e.clientY - yOffset;
+                if (!e.target.classList.contains('material-icons')) { isDragging = true; document.addEventListener('mousemove', drag); document.addEventListener('mouseup', dragEnd); }
+            });
+
+            function drag(e) { if (isDragging) { e.preventDefault(); currentX = e.clientX - initialX; currentY = e.clientY - initialY; xOffset = currentX; yOffset = currentY; windowEl.style.transform = `translate(${currentX}px, ${currentY}px)`; } }
+            function dragEnd() { isDragging = false; document.removeEventListener('mousemove', drag); document.removeEventListener('mouseup', dragEnd); }
+
+            document.getElementById('desktop').appendChild(windowEl);
+            if(app.init) app.init(windowEl);
+        }
+
+        VFS.init().then(() => {
+            initInstalledApps();
+            initLoginScreen();
+        });
+    </script>
+</body>
+</html>
