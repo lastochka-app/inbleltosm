@@ -905,8 +905,14 @@
                         const tabEl = document.createElement('div');
                         tabEl.className = 'browser-tab';
                         tabEl.innerHTML = `<span class="tab-title">Загрузка...</span><span class="material-icons close-tab">close</span>`;
+                        
+                        // --- ИСПРАВЛЕНИЕ: Проверяем, нужен ли прокси ---
+                        const useProxy = !url.includes('wikipedia.org');
+                        const iframeUrl = useProxy ? 'https://corsproxy.io/?' + encodeURIComponent(url) : url;
+
                         const iframeEl = document.createElement('iframe');
-                        iframeEl.className = 'browser-iframe'; iframeEl.src = url;
+                        iframeEl.className = 'browser-iframe'; 
+                        iframeEl.src = iframeUrl;
 
                         tabsContainer.appendChild(tabEl); framesContainer.appendChild(iframeEl);
                         tabs.push({ id, url, tabEl, iframeEl });
@@ -919,10 +925,10 @@
                         iframeEl.addEventListener('load', () => {
                             const t = tabs.find(t => t.id === id);
                             if(t) {
-                                t.url = iframeEl.src;
-                                tabEl.querySelector('.tab-title').textContent = getHostName(iframeEl.src);
-                                tabEl.title = iframeEl.src;
-                                if (activeTabId === id) urlInput.value = iframeEl.src;
+                                // Восстанавливаем оригинальный URL для отображения
+                                tabEl.querySelector('.tab-title').textContent = getHostName(t.url);
+                                tabEl.title = t.url;
+                                if (activeTabId === id) urlInput.value = t.url;
                             }
                         });
                         switchTab(id);
@@ -933,7 +939,7 @@
                         tabs.forEach(tab => {
                             if (tab.id === id) {
                                 tab.tabEl.classList.add('active'); tab.iframeEl.classList.add('active');
-                                urlInput.value = tab.iframeEl.src !== 'about:blank' ? tab.iframeEl.src : tab.url;
+                                urlInput.value = tab.url; // Показываем реальный URL, а не прокси
                             } else {
                                 tab.tabEl.classList.remove('active'); tab.iframeEl.classList.remove('active');
                             }
@@ -954,8 +960,17 @@
                         let url = urlInput.value.trim();
                         if (!url) return;
                         if (!url.startsWith('http://') && !url.startsWith('https://')) url = 'https://' + url;
+                        
                         const activeTab = tabs.find(t => t.id === activeTabId);
-                        if (activeTab) { activeTab.iframeEl.src = url; activeTab.url = url; activeTab.tabEl.querySelector('.tab-title').textContent = 'Загрузка...'; }
+                        if (activeTab) { 
+                            // --- ИСПРАВЛЕНИЕ: Оборачиваем запрос в CORS-прокси ---
+                            const useProxy = !url.includes('wikipedia.org');
+                            const proxyUrl = useProxy ? 'https://corsproxy.io/?' + encodeURIComponent(url) : url;
+                            
+                            activeTab.iframeEl.src = proxyUrl; 
+                            activeTab.url = url; // Запоминаем оригинальный URL
+                            activeTab.tabEl.querySelector('.tab-title').textContent = 'Загрузка...'; 
+                        }
                     };
 
                     goBtn.addEventListener('click', navigate);
