@@ -23,6 +23,22 @@
             cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="28" viewBox="0 0 24 28"><path d="M2 2 L14 14 H8.5 L12 21.5 L9.5 22.5 L6 15 L2 19 V2 Z" fill="%23212121" stroke="%23ffffff" stroke-width="1.5" stroke-linejoin="round"/></svg>') 2 2, default;
         }
 
+        /* --- Экран Первоначальной Настройки (OOBE) --- */
+        #setup-screen {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: #263238; z-index: 100000;
+            display: none; align-items: center; justify-content: center; flex-direction: column;
+            color: #FFFFFF;
+        }
+        .setup-box {
+            background: #FFFFFF; color: #212121; padding: 40px; border-radius: 4px;
+            box-shadow: 0 16px 24px 2px rgba(0,0,0,0.14), 0 6px 30px 5px rgba(0,0,0,0.12), 0 8px 10px -5px rgba(0,0,0,0.2);
+            width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 24px;
+            animation: windowAppear 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .setup-title { font-size: 28px; font-weight: 500; margin: 0; color: #009688; display: flex; align-items: center; gap: 12px; }
+        .setup-desc { font-size: 15px; color: #757575; line-height: 1.5; margin: 0; }
+
         /* --- Экран Входа в Систему --- */
         #login-screen {
             position: fixed;
@@ -30,7 +46,7 @@
             width: 100vw; height: 100vh;
             background-color: #ECEFF1;
             z-index: 99999;
-            display: flex;
+            display: none; /* Скрыт по умолчанию, управляется скриптом */
             align-items: center;
             justify-content: center;
             flex-direction: column;
@@ -236,6 +252,30 @@
 </head>
 <body>
 
+    <!-- Экран первоначальной настройки (OOBE) -->
+    <div id="setup-screen">
+        <div class="setup-box">
+            <h1 class="setup-title"><span class="material-icons" style="font-size: 36px;">explore</span> Добро пожаловать</h1>
+            <p class="setup-desc">Похоже, вы запускаете InbleltOS впервые. Давайте выполним первоначальную настройку системы и создадим учетную запись администратора.</p>
+            
+            <div style="display: flex; flex-direction: column; gap: 16px; margin-top: 8px;">
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <label style="font-size: 13px; font-weight: 500; color: #757575;">Имя пользователя *</label>
+                    <input type="text" id="setup-username" placeholder="Например: Admin" style="border-bottom-color: #009688;">
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <label style="font-size: 13px; font-weight: 500; color: #757575;">Пароль (необязательно)</label>
+                    <input type="password" id="setup-password" placeholder="Введите пароль" style="border-bottom-color: #009688;">
+                </div>
+            </div>
+            
+            <div style="display: flex; justify-content: flex-end; margin-top: 16px;">
+                <button id="setup-submit-btn" style="background: #009688; padding: 10px 24px; font-size: 14px;">Установить систему</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Экран входа -->
     <div id="login-screen">
         <h1 class="login-title">Вход в InbleltOS</h1>
         <div id="login-users-list"></div>
@@ -252,6 +292,7 @@
         </div>
     </div>
 
+    <!-- Рабочий стол -->
     <div id="desktop">
         <div class="desktop-icon" onclick="launchApp('explorer')">
             <span class="material-icons" style="color: #FFB300;">folder</span>
@@ -435,7 +476,7 @@
         let currentUser = null;
         let selectedUserObj = null; 
         
-        let usersList = JSON.parse(localStorage.getItem('os_users_list') || '[{"name": "Гость", "password": ""}]');
+        let usersList = JSON.parse(localStorage.getItem('os_users_list') || '[]');
         if (usersList.length > 0 && typeof usersList[0] === 'string') {
             usersList = usersList.map(username => ({ name: username, password: "" }));
             localStorage.setItem('os_users_list', JSON.stringify(usersList));
@@ -448,7 +489,30 @@
         function saveUserData(key, value) { localStorage.setItem(getUserKey(key), value); }
         function loadUserData(key) { return localStorage.getItem(getUserKey(key)); }
 
+        // --- Логика OOBE (Первоначальной настройки) ---
+        document.getElementById('setup-submit-btn').addEventListener('click', () => {
+            const username = document.getElementById('setup-username').value.trim();
+            const password = document.getElementById('setup-password').value;
+
+            if (!username) {
+                alert('Пожалуйста, введите имя пользователя для продолжения.');
+                return;
+            }
+
+            localStorage.setItem('os_installed', 'true');
+            usersList = [{ name: username, password: password }];
+            localStorage.setItem('os_users_list', JSON.stringify(usersList));
+
+            document.getElementById('setup-screen').style.display = 'none';
+            initLoginScreen();
+            
+            // Опционально: можно раскомментировать строку ниже для авто-входа после установки
+            // loginSystem(username);
+        });
+
+        // --- Логика входа ---
         function initLoginScreen() {
+            document.getElementById('login-screen').style.display = 'flex';
             document.getElementById('login-users-list').style.display = 'flex';
             document.getElementById('password-container').style.display = 'none';
             document.getElementById('login-password-input').value = '';
@@ -529,7 +593,6 @@
             document.getElementById('desktop').style.display = 'none';
             document.getElementById('taskbar').style.display = 'none';
             document.getElementById('start-menu').style.display = 'none';
-            document.getElementById('login-screen').style.display = 'flex';
             document.body.style.backgroundColor = '#ECEFF1';
             document.body.style.backgroundImage = '';
 
@@ -906,7 +969,6 @@
                         tabEl.className = 'browser-tab';
                         tabEl.innerHTML = `<span class="tab-title">Загрузка...</span><span class="material-icons close-tab">close</span>`;
                         
-                        // --- ИСПРАВЛЕНИЕ: Проверяем, нужен ли прокси ---
                         const useProxy = !url.includes('wikipedia.org');
                         const iframeUrl = useProxy ? 'https://corsproxy.io/?' + encodeURIComponent(url) : url;
 
@@ -925,7 +987,6 @@
                         iframeEl.addEventListener('load', () => {
                             const t = tabs.find(t => t.id === id);
                             if(t) {
-                                // Восстанавливаем оригинальный URL для отображения
                                 tabEl.querySelector('.tab-title').textContent = getHostName(t.url);
                                 tabEl.title = t.url;
                                 if (activeTabId === id) urlInput.value = t.url;
@@ -939,7 +1000,7 @@
                         tabs.forEach(tab => {
                             if (tab.id === id) {
                                 tab.tabEl.classList.add('active'); tab.iframeEl.classList.add('active');
-                                urlInput.value = tab.url; // Показываем реальный URL, а не прокси
+                                urlInput.value = tab.url; 
                             } else {
                                 tab.tabEl.classList.remove('active'); tab.iframeEl.classList.remove('active');
                             }
@@ -963,12 +1024,11 @@
                         
                         const activeTab = tabs.find(t => t.id === activeTabId);
                         if (activeTab) { 
-                            // --- ИСПРАВЛЕНИЕ: Оборачиваем запрос в CORS-прокси ---
                             const useProxy = !url.includes('wikipedia.org');
                             const proxyUrl = useProxy ? 'https://corsproxy.io/?' + encodeURIComponent(url) : url;
                             
                             activeTab.iframeEl.src = proxyUrl; 
-                            activeTab.url = url; // Запоминаем оригинальный URL
+                            activeTab.url = url; 
                             activeTab.tabEl.querySelector('.tab-title').textContent = 'Загрузка...'; 
                         }
                     };
@@ -978,7 +1038,6 @@
                     refreshBtn.addEventListener('click', () => { const t = tabs.find(t => t.id === activeTabId); if (t) t.iframeEl.src = t.iframeEl.src; });
                     newTabBtn.addEventListener('click', () => createTab('https://ya.ru/'));
 
-                    // Реализация изоляции скачивания файлов
                     dlBtn.addEventListener('click', () => {
                         let url = urlInput.value.trim();
                         if (!url || url.includes('wikipedia.org/wiki')) {
@@ -1462,9 +1521,21 @@
             if(app.init) app.init(windowEl);
         }
 
+        // --- Главный процесс инициализации (Boot) ---
+        function bootSystem() {
+            const isInstalled = localStorage.getItem('os_installed');
+            // Проверка на отсутствие флага установки или отсутствие юзеров вообще
+            if (!isInstalled || usersList.length === 0) {
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('setup-screen').style.display = 'flex';
+            } else {
+                initLoginScreen();
+            }
+        }
+
         VFS.init().then(() => {
             initInstalledApps();
-            initLoginScreen();
+            bootSystem();
         });
     </script>
 </body>
