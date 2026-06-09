@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>InbleltOS (Strict Sandbox)</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Добавлен тонкий шрифт (wght@100) для экрана загрузки -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;400;500;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
@@ -13,7 +14,7 @@
             margin: 0;
             overflow: hidden;
             font-family: 'Roboto', sans-serif;
-            background-color: #000000; 
+            background-color: #ECEFF1; 
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
@@ -23,64 +24,47 @@
             cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="28" viewBox="0 0 24 28"><path d="M2 2 L14 14 H8.5 L12 21.5 L9.5 22.5 L6 15 L2 19 V2 Z" fill="%23212121" stroke="%23ffffff" stroke-width="1.5" stroke-linejoin="round"/></svg>') 2 2, default;
         }
 
-        /* --- Настоящий Экран Загрузки (Boot Screen) --- */
+        /* --- Экран Загрузки и Установки --- */
         #boot-screen {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background-color: #0d1117; z-index: 200000;
-            display: flex; align-items: center; justify-content: center; flex-direction: column;
-            color: #FFFFFF; transition: opacity 0.5s ease;
-        }
-        .boot-title {
-            font-family: 'Roboto', sans-serif;
-            font-size: 56px; font-weight: 700; letter-spacing: 2px;
-            margin: 0; animation: bootPulse 2s infinite ease-in-out;
-        }
-        @keyframes bootPulse {
-            0%, 100% { opacity: 0.6; transform: scale(0.98); }
-            50% { opacity: 1; transform: scale(1); }
-        }
-        .boot-spinner {
-            margin-top: 24px; width: 28px; height: 28px;
-            border: 3px solid rgba(255,255,255,0.1); border-top-color: #FFFFFF;
-            border-radius: 50%; animation: spin 1s linear infinite;
+            background-color: #000000; z-index: 9999999;
+            display: none; align-items: center; justify-content: center;
+            font-family: 'Roboto', sans-serif; font-weight: 100; font-size: 56px;
+            color: #FFFFFF; letter-spacing: 2px;
         }
 
-        /* --- Экран Установки и Первоначальной Настройки (Setup / OOBE Wizard) --- */
+        /* --- Экран Первоначальной Настройки (OOBE) --- */
         #setup-screen {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background-color: #212121; z-index: 100000;
+            background-color: #263238; z-index: 100000;
             display: none; align-items: center; justify-content: center; flex-direction: column;
             color: #FFFFFF;
         }
         .setup-box {
-            background: #FFFFFF; color: #212121; padding: 32px; border-radius: 4px;
-            box-shadow: 0 16px 24px 2px rgba(0,0,0,0.3);
-            width: 100%; max-width: 520px; min-height: 400px;
-            display: flex; flex-direction: column; justify-content: space-between; gap: 20px;
-            animation: windowAppear 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            background: #FFFFFF; color: #212121; padding: 40px; border-radius: 4px;
+            box-shadow: 0 16px 24px 2px rgba(0,0,0,0.14), 0 6px 30px 5px rgba(0,0,0,0.12), 0 8px 10px -5px rgba(0,0,0,0.2);
+            width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 24px;
+            animation: windowAppear 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            max-height: 90vh; overflow-y: auto;
         }
-        .setup-header { display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #E0E0E0; padding-bottom: 12px; }
-        .setup-title { font-size: 24px; font-weight: 500; margin: 0; color: #3F51B5; }
-        .setup-body { flex-grow: 1; display: flex; flex-direction: column; gap: 16px; font-size: 14px; line-height: 1.5; color: #424242; }
-        .setup-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #E0E0E0; padding-top: 16px; }
+        .setup-title { font-size: 28px; font-weight: 500; margin: 0; color: #009688; display: flex; align-items: center; gap: 12px; }
+        .setup-desc { font-size: 15px; color: #757575; line-height: 1.5; margin: 0; }
         
-        /* Стили внутренних компонентов установщика */
-        .eula-text { background: #F5F5F5; border: 1px solid #E0E0E0; padding: 12px; height: 180px; overflow-y: scroll; font-family: monospace; font-size: 11px; color: #616161; border-radius: 2px; }
-        .disk-list { display: flex; flex-direction: column; gap: 8px; }
-        .disk-item { border: 2px solid #E0E0E0; border-radius: 4px; padding: 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s; }
-        .disk-item.selected { border-color: #3F51B5; background: #E8EAF6; }
-        .progress-container { width: 100%; background: #E0E0E0; height: 8px; border-radius: 4px; overflow: hidden; margin-top: 8px; }
-        .progress-bar { width: 0%; height: 100%; background: #3F51B5; transition: width 0.1s linear; }
-        
-        .setup-wallpaper-grid { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
-        .setup-wp-thumb { width: 100px; height: 60px; border: 3px solid transparent; border-radius: 4px; cursor: pointer; background-size: cover; background-position: center; transition: 0.2s; }
-        .setup-wp-thumb.selected { border-color: #3F51B5; transform: scale(1.05); }
+        .setup-avatar-opt { font-size: 40px; color: #B0BEC5; cursor: pointer; transition: 0.2s; border-radius: 50%; border: 2px solid transparent; padding: 4px; }
+        .setup-avatar-opt:hover { color: #78909C; }
+        .setup-avatar-opt.selected { color: #009688; border-color: #009688; }
 
         /* --- Экран Входа в Систему --- */
         #login-screen {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background-color: #ECEFF1; z-index: 99999;
-            display: none; align-items: center; justify-content: center; flex-direction: column;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background-color: #ECEFF1;
+            z-index: 99999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
             animation: fadeIn 0.3s ease;
         }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -88,57 +72,49 @@
 
         .login-title { font-size: 32px; font-weight: 400; color: #37474F; margin-bottom: 48px; text-shadow: 0 1px 2px rgba(0,0,0,0.1); }
         #login-users-list { display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; max-width: 800px; }
-        .login-user-card { background: #FFFFFF; padding: 32px; border-radius: 2px; box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 1px 5px 0 rgba(0,0,0,0.12); display: flex; flex-direction: column; align-items: center; cursor: pointer !important; transition: transform 0.2s, box-shadow 0.2s; min-width: 140px; position: relative; }
-        .login-user-card:hover { transform: translateY(-4px); box-shadow: 0 8px 10px 1px rgba(0,0,0,0.14); }
+        
+        .login-user-card {
+            background: #FFFFFF; padding: 32px; border-radius: 2px;
+            box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 1px 5px 0 rgba(0,0,0,0.12), 0 3px 1px -2px rgba(0,0,0,0.2);
+            display: flex; flex-direction: column; align-items: center;
+            cursor: pointer !important; transition: transform 0.2s, box-shadow 0.2s; min-width: 140px; position: relative;
+        }
+        .login-user-card:hover { transform: translateY(-4px); box-shadow: 0 8px 10px 1px rgba(0,0,0,0.14), 0 3px 14px 2px rgba(0,0,0,0.12), 0 5px 5px -3px rgba(0,0,0,0.2); }
         .login-user-card .material-icons.avatar { font-size: 72px; color: #009688; margin-bottom: 16px; }
         .login-user-card span { font-size: 20px; font-weight: 500; color: #212121; }
 
         /* --- Рабочий Стол и UI --- */
-        #desktop {
-            width: 100vw; height: calc(100vh - 48px);
-            position: relative; padding: 16px; box-sizing: border-box;
-            display: none; flex-direction: column; align-content: flex-start; flex-wrap: wrap; gap: 8px;
-        }
-
-        .desktop-icon, .start-btn, .taskbar-item, .start-menu-item, button, .window-controls .material-icons, #user-display, .context-menu-item, .setup-wp-thumb, .disk-item {
-            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="28" viewBox="0 0 24 28"><path d="M2 2 L14 14 H8.5 L12 21.5 L9.5 22.5 L6 15 L2 19 V2 Z" fill="%23FF4081" stroke="%23ffffff" stroke-width="1.5" stroke-linejoin="round"/></svg>') 2 2, pointer !important;
-        }
-
+        #desktop { width: 100vw; height: calc(100vh - 48px); position: relative; padding: 16px; box-sizing: border-box; display: none; flex-direction: column; align-content: flex-start; flex-wrap: wrap; gap: 8px; }
+        .desktop-icon, .start-btn, .taskbar-item, .start-menu-item, button, .window-controls .material-icons, #user-display, .context-menu-item { cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="28" viewBox="0 0 24 28"><path d="M2 2 L14 14 H8.5 L12 21.5 L9.5 22.5 L6 15 L2 19 V2 Z" fill="%23FF4081" stroke="%23ffffff" stroke-width="1.5" stroke-linejoin="round"/></svg>') 2 2, pointer !important; }
         .desktop-icon { width: 90px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px 8px; border-radius: 2px; transition: background-color 0.2s ease; text-align: center; color: #FFFFFF; }
         .desktop-icon:hover { background-color: rgba(0, 0, 0, 0.2); }
         .desktop-icon .material-icons { font-size: 48px; margin-bottom: 8px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
         .desktop-icon span { font-size: 13px; font-weight: 500; color: #FFFFFF; text-shadow: 0 1px 3px rgba(0,0,0,0.9), 0 0 4px rgba(0,0,0,0.6); }
 
-        #taskbar { position: fixed; bottom: 0; width: 100%; height: 48px; background-color: #263238; display: none; align-items: center; padding: 0 8px; box-sizing: border-box; z-index: 10000; box-shadow: 0 -2px 4px -1px rgba(0,0,0,0.2); }
+        #taskbar { position: fixed; bottom: 0; width: 100%; height: 48px; background-color: #263238; display: none; align-items: center; padding: 0 8px; box-sizing: border-box; z-index: 10000; box-shadow: 0 -2px 4px -1px rgba(0,0,0,0.2), 0 -4px 5px 0 rgba(0,0,0,0.14), 0 -1px 10px 0 rgba(0,0,0,0.12); }
         .start-btn { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; transition: background-color 0.2s; color: #FFFFFF; }
         .start-btn:hover { background-color: rgba(255, 255, 255, 0.1); }
         .start-btn .material-icons { font-size: 26px; }
-
         #taskbar-apps { display: flex; flex-grow: 1; margin-left: 12px; gap: 6px; overflow-x: auto; }
         #taskbar-apps::-webkit-scrollbar { display: none; }
-        
         .taskbar-item { display: flex; align-items: center; padding: 0 16px; height: 36px; background-color: transparent; color: #B0BEC5; border-radius: 2px; font-size: 14px; font-weight: 500; text-transform: uppercase; transition: background-color 0.15s, color 0.15s; max-width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .taskbar-item:hover { background-color: rgba(255, 255, 255, 0.1); color: #FFFFFF; }
         .taskbar-item.active { background-color: rgba(255, 255, 255, 0.15); color: #FFFFFF; border-bottom: 2px solid #FF4081; }
         .taskbar-item .material-icons { font-size: 18px; margin-right: 8px; }
-
         #user-display { display: flex; align-items: center; padding: 0 12px; height: 36px; border-radius: 2px; color: #FFFFFF; font-size: 14px; font-weight: 500; transition: background-color 0.2s; }
         #user-display:hover { background-color: rgba(255, 255, 255, 0.1); }
         #user-display .material-icons { margin-right: 6px; font-size: 18px; }
         #clock { margin-left: 8px; font-size: 14px; font-weight: 500; color: #FFFFFF; padding-right: 8px; cursor: default; }
-
-        #start-menu { position: fixed; bottom: 56px; left: 16px; width: 280px; background-color: #FFFFFF; border-radius: 2px; box-shadow: 0 8px 10px 1px rgba(0,0,0,0.14); display: none; flex-direction: column; padding: 8px 0; z-index: 9999; transform-origin: bottom left; animation: menuPop 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        #start-menu { position: fixed; bottom: 56px; left: 16px; width: 280px; background-color: #FFFFFF; border-radius: 2px; box-shadow: 0 8px 10px 1px rgba(0,0,0,0.14), 0 3px 14px 2px rgba(0,0,0,0.12), 0 5px 5px -3px rgba(0,0,0,0.2); display: none; flex-direction: column; padding: 8px 0; z-index: 9999; transform-origin: bottom left; animation: menuPop 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
         @keyframes menuPop { from { opacity: 0; transform: scale(0.9) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
-
         .start-menu-item { display: flex; align-items: center; padding: 12px 24px; font-size: 15px; font-weight: 500; color: #212121; transition: background-color 0.15s; }
         .start-menu-item:hover { background-color: #EEEEEE; }
         .start-menu-item .material-icons { margin-right: 24px; font-size: 24px; color: #757575; }
 
         /* Окна */
         @keyframes windowAppear { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-        .window { position: absolute; background-color: #FAFAFA; color: #212121; border-radius: 2px; box-shadow: 0 16px 24px 2px rgba(0,0,0,0.14); display: flex; flex-direction: column; overflow: hidden; transition: opacity 0.2s, width 0.2s, height 0.2s; animation: windowAppear 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .window { position: absolute; background-color: #FAFAFA; color: #212121; border-radius: 2px; box-shadow: 0 16px 24px 2px rgba(0,0,0,0.14), 0 6px 30px 5px rgba(0,0,0,0.12), 0 8px 10px -5px rgba(0,0,0,0.2); display: flex; flex-direction: column; overflow: hidden; transition: opacity 0.2s, width 0.2s, height 0.2s; animation: windowAppear 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
         .window.maximized { top: 0 !important; left: 0 !important; width: 100vw !important; height: calc(100vh - 48px) !important; border-radius: 0; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
-        
         .title-bar { height: 56px; padding: 0 16px; display: flex; justify-content: space-between; align-items: center; color: #FFFFFF; cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5" fill="%23212121" stroke="%23ffffff" stroke-width="1.5"/></svg>') 12 12, grab !important; box-shadow: 0 2px 5px rgba(0,0,0,0.26); z-index: 10; }
         .window.maximized .title-bar { cursor: default !important; }
         .title-bar:active { cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" fill="%23FF4081" stroke="%23ffffff" stroke-width="1.5"/></svg>') 12 12, grabbing !important; }
@@ -150,167 +126,143 @@
         .window-content { flex-grow: 1; overflow: hidden; display: flex; flex-direction: column; background-color: #FAFAFA; position: relative; }
 
         /* Элементы MD1 */
-        button { background: #FF4081; color: white; border: none; padding: 8px 16px; border-radius: 2px; font-size: 14px; font-weight: 500; text-transform: uppercase; box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14); transition: background 0.2s, box-shadow 0.2s; font-family: 'Roboto', sans-serif; letter-spacing: 0.5px; }
-        button:hover { background: #F50057; box-shadow: 0 3px 3px 0 rgba(0,0,0,0.14); }
-        button:active { background: #C51162; }
+        button { background: #FF4081; color: white; border: none; padding: 8px 16px; border-radius: 2px; font-size: 14px; font-weight: 500; text-transform: uppercase; box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 1px 5px 0 rgba(0,0,0,0.12), 0 3px 1px -2px rgba(0,0,0,0.2); transition: background 0.2s, box-shadow 0.2s; font-family: 'Roboto', sans-serif; letter-spacing: 0.5px; }
+        button:hover { background: #F50057; box-shadow: 0 3px 3px 0 rgba(0,0,0,0.14), 0 1px 7px 0 rgba(0,0,0,0.12), 0 3px 1px -1px rgba(0,0,0,0.2); }
+        button:active { background: #C51162; box-shadow: 0 4px 5px 0 rgba(0,0,0,0.14), 0 1px 10px 0 rgba(0,0,0,0.12), 0 2px 4px -1px rgba(0,0,0,0.2); }
         button:disabled { background: #B0BEC5; color: #78909C; box-shadow: none; cursor: not-allowed !important; }
-        
         input[type="text"], input[type="password"] { border: none; border-bottom: 2px solid #B0BEC5; background: transparent; padding: 8px 0; font-size: 16px; outline: none; transition: border-bottom-color 0.2s; font-family: 'Roboto', sans-serif; color: #212121; }
         input[type="text"]:focus, input[type="password"]:focus { border-bottom-color: #3F51B5; }
 
         .app-notepad, input[type="text"], input[type="password"] { cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M12 4v16m-4-16h8m-8 16h8" stroke="%23212121" stroke-width="2" fill="none"/></svg>') 12 12, text !important; }
         .app-terminal, .app-terminal-input { cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M12 4v16m-4-16h8m-8 16h8" stroke="%2300E676" stroke-width="2" fill="none"/></svg>') 12 12, text !important; }
 
-        /* Приложения (Браузер, Калькулятор, Задачи, Проводник, Контекстное меню) */
+        /* Приложения (свернуты для компактности) */
         .app-browser-container { display: flex; flex-direction: column; height: 100%; background: #FAFAFA; }
         .app-browser-tabs-container { display: flex; background: #D32F2F; padding: 8px 8px 0 8px; align-items: flex-end; overflow-x: auto; }
+        .app-browser-tabs-container::-webkit-scrollbar { height: 4px; }
+        .app-browser-tabs-container::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 4px; }
         .browser-tabs { display: flex; gap: 4px; flex-grow: 1; }
-        .browser-tab { display: flex; align-items: center; background: #EF5350; color: rgba(255,255,255,0.8); padding: 8px 12px; border-radius: 4px 4px 0 0; cursor: pointer; font-size: 13px; max-width: 200px; min-width: 120px; }
+        .browser-tab { display: flex; align-items: center; background: #EF5350; color: rgba(255,255,255,0.8); padding: 8px 12px; border-radius: 4px 4px 0 0; cursor: pointer; font-size: 13px; max-width: 200px; min-width: 120px; transition: background 0.2s, color 0.2s; }
+        .browser-tab:hover { background: #E57373; color: #FFF; }
         .browser-tab.active { background: #EEEEEE; color: #212121; }
         .browser-tab .tab-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-grow: 1; margin-right: 8px; pointer-events: none; }
-        .browser-tab .close-tab { font-size: 16px; opacity: 0.6; }
+        .browser-tab .close-tab { font-size: 16px; opacity: 0.6; transition: opacity 0.2s, background 0.2s; border-radius: 50%; }
+        .browser-tab .close-tab:hover { opacity: 1; background: rgba(0,0,0,0.1); }
         .app-browser-bar { display: flex; padding: 8px 16px; background: #EEEEEE; gap: 12px; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); z-index: 5; }
-        .app-browser-bar input { flex-grow: 1; border: none; padding: 8px 12px; border-radius: 2px; background: #FFFFFF; font-size: 14px; }
+        .app-browser-bar input { flex-grow: 1; border: none; padding: 8px 12px; border-radius: 2px; background: #FFFFFF; font-size: 14px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.1); margin: 0; }
+        .app-browser-bar input:focus { outline: 1px solid #F44336; }
         .browser-frames-container { flex-grow: 1; position: relative; }
         .browser-iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; display: none; background: #FFF; }
         .browser-iframe.active { display: block; }
         
         .app-terminal { background: #263238; color: #00E676; font-family: 'Consolas', monospace; padding: 16px; display: flex; flex-direction: column; height: 100%; box-sizing: border-box; font-size: 14px;}
-        .app-terminal-output { flex-grow: 1; overflow-y: auto; margin-bottom: 8px; white-space: pre-wrap; }
+        .app-terminal-output { flex-grow: 1; overflow-y: auto; margin-bottom: 8px; white-space: pre-wrap; word-wrap: break-word; }
         .app-terminal-input-row { display: flex; align-items: center; }
         .app-terminal-input-row span { margin-right: 8px; font-weight: bold;}
-        .app-terminal-input { flex-grow: 1; border: none; color: #00E676; outline: none; padding: 0;}
+        .app-terminal-input { flex-grow: 1; border: none; color: #00E676; outline: none; border-bottom: none; padding: 0;}
         
         .app-calc { display: flex; flex-direction: column; height: 100%; background: #FAFAFA; }
-        .app-calc-display { background: #FFFFFF; padding: 24px 16px; font-size: 36px; text-align: right; box-shadow: 0 1px 3px rgba(0,0,0,0.12); color: #212121; }
+        .app-calc-display { background: #FFFFFF; padding: 24px 16px; font-size: 36px; text-align: right; box-shadow: 0 1px 3px rgba(0,0,0,0.12); overflow: hidden; text-overflow: ellipsis; color: #212121; }
         .app-calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); flex-grow: 1; }
-        .app-calc-btn { background: #FAFAFA; border: none; border-right: 1px solid #E0E0E0; border-bottom: 1px solid #E0E0E0; font-size: 20px; color: #212121; box-shadow: none; text-transform: none; }
-        .app-calc-btn.op { background: #EEEEEE; color: #3F51B5; }
+        .app-calc-btn { background: #FAFAFA; border: none; border-right: 1px solid #E0E0E0; border-bottom: 1px solid #E0E0E0; border-radius: 0; font-size: 20px; font-weight: 400; color: #212121; box-shadow: none; transition: background 0.15s; text-transform: none; }
+        .app-calc-btn:hover { background: #EEEEEE; }
+        .app-calc-btn.op { background: #EEEEEE; color: #3F51B5; font-weight: 500; }
         .app-calc-btn.equal { background: #3F51B5; color: #FFFFFF; grid-column: span 2; }
+        .app-calc-btn.equal:hover { background: #303F9F; }
 
         .app-tasks { padding: 24px; display: flex; flex-direction: column; height: 100%; box-sizing: border-box; background: #FAFAFA;}
         .task-input-row { display: flex; gap: 16px; margin-bottom: 24px; align-items: flex-end; }
         .task-input-row input { flex-grow: 1; margin-bottom: 4px; }
-        .task-list { list-style: none; padding: 0; margin: 0; flex-grow: 1; overflow-y: auto; background: #FFFFFF; box-shadow: 0 1px 3px rgba(0,0,0,0.12); border-radius: 2px;}
-        .task-item { display: flex; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 1px solid #EEEEEE;}
+        .task-list { list-style: none; padding: 0; margin: 0; flex-grow: 1; overflow-y: auto; background: #FFFFFF; box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); border-radius: 2px;}
+        .task-item { display: flex; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 1px solid #EEEEEE; transition: background 0.2s;}
+        .task-item:last-child { border-bottom: none; }
+        .task-item:hover { background: #F5F5F5; }
         .task-item.completed span { text-decoration: line-through; color: #9E9E9E; }
-        .task-item button { background: transparent; color: #757575; box-shadow: none; padding: 8px; border-radius: 50%; }
+        .task-item button { background: transparent; color: #757575; box-shadow: none; padding: 8px; border-radius: 50%; opacity: 0;}
+        .task-item button:hover { background: rgba(0,0,0,0.05); color: #F44336; }
+        .task-item:hover button { opacity: 1; }
 
         .app-settings { display: flex; flex-direction: column; height: 100%; background: #FAFAFA; }
-        .settings-nav { display: flex; background: #607D8B; padding: 0 16px; }
-        .settings-tab-btn { background: transparent; color: rgba(255,255,255,0.7); box-shadow: none; border-radius: 0; padding: 16px 24px; border-bottom: 2px solid transparent; font-size: 14px; }
+        .settings-nav { display: flex; background: #607D8B; padding: 0 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .settings-tab-btn { background: transparent; color: rgba(255,255,255,0.7); box-shadow: none; border-radius: 0; padding: 16px 24px; border-bottom: 2px solid transparent; font-size: 14px; font-weight: 500; }
+        .settings-tab-btn:hover { background: rgba(255,255,255,0.1); box-shadow: none; color: #FFF; }
         .settings-tab-btn.active { color: #FFF; border-bottom-color: #FFF; }
         .settings-content { padding: 24px; flex-grow: 1; overflow-y: auto; }
-        .settings-section { display: none; }
+        .settings-section { display: none; animation: fadeIn 0.2s ease; }
         .settings-section.active { display: block; }
-        .color-picker-row { display: flex; align-items: center; gap: 16px; margin-top: 24px; padding: 16px; background: #FFFFFF; border-radius: 2px; box-shadow: 0 1px 3px rgba(0,0,0,0.12); }
-        .color-picker-row input[type="color"] { border: none; width: 48px; height: 48px; background: none; }
+        .settings-content h3 { margin-top: 0; font-weight: 500; font-size: 20px; color: #212121; margin-bottom: 8px; }
+        .color-picker-row { display: flex; align-items: center; gap: 16px; margin-top: 24px; padding: 16px; background: #FFFFFF; border-radius: 2px; box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); }
+        .color-picker-row input[type="color"] { cursor: pointer; border: none; width: 48px; height: 48px; padding: 0; background: none; }
 
-        #context-menu { position: fixed; background-color: #FFFFFF; border-radius: 2px; box-shadow: 0 8px 10px 1px rgba(0,0,0,0.14); padding: 8px 0; min-width: 200px; z-index: 20000; display: none; transform-origin: top left; animation: menuPop 0.15s cubic-bezier(0.4, 0, 0.2, 1); }
-        .context-menu-item { display: flex; align-items: center; padding: 12px 24px; font-size: 15px; color: #212121; }
+        #context-menu { position: fixed; background-color: #FFFFFF; border-radius: 2px; box-shadow: 0 8px 10px 1px rgba(0,0,0,0.14), 0 3px 14px 2px rgba(0,0,0,0.12), 0 5px 5px -3px rgba(0,0,0,0.2); padding: 8px 0; min-width: 200px; z-index: 20000; display: none; transform-origin: top left; animation: menuPop 0.15s cubic-bezier(0.4, 0, 0.2, 1); }
+        .context-menu-item { display: flex; align-items: center; padding: 12px 24px; font-size: 15px; font-weight: 400; color: #212121; transition: background-color 0.15s; }
         .context-menu-item:hover { background-color: #EEEEEE; }
         .context-menu-item .material-icons { margin-right: 24px; font-size: 20px; color: #757575; }
 
         .explorer-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; background: white; }
         .explorer-table th { background: #ECEFF1; padding: 10px; font-weight: 500; border-bottom: 1px solid #CFD8DC; color: #455A64; }
-        .explorer-table td { padding: 10px; border-bottom: 1px solid #F5F5F5; color: #212121; }
+        .explorer-table td { padding: 10px; border-bottom: 1px solid #F5F5F5; color: #212121; vertical-align: middle; }
+        .explorer-table tr:hover td { background: #F5F5F5; }
     </style>
 </head>
 <body>
 
-    <div id="boot-screen">
-        <h1 class="boot-title">InbleltOS</h1>
-        <div class="boot-spinner"></div>
-    </div>
+    <!-- Экран Загрузки и Установки -->
+    <div id="boot-screen">InbleltOS</div>
 
+    <!-- Экран первоначальной настройки (OOBE) -->
     <div id="setup-screen">
         <div class="setup-box">
-            <div class="setup-header">
-                <span class="material-icons" id="setup-icon" style="font-size: 32px; color: #3F51B5;">album</span>
-                <h2 class="setup-title" id="setup-step-title">Установка системы</h2>
+            <h1 class="setup-title"><span class="material-icons" style="font-size: 36px;">explore</span> Установка InbleltOS</h1>
+            <p class="setup-desc">Настройте свой профиль для начала работы с новой системой.</p>
+            
+            <div style="display: flex; flex-direction: column; gap: 16px; margin-top: 8px;">
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <label style="font-size: 13px; font-weight: 500; color: #757575;">Имя пользователя *</label>
+                    <input type="text" id="setup-username" placeholder="Например: Admin" style="border-bottom-color: #009688;">
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <label style="font-size: 13px; font-weight: 500; color: #757575;">Пароль (необязательно)</label>
+                    <input type="password" id="setup-password" placeholder="Введите пароль" style="border-bottom-color: #009688;">
+                </div>
+
+                <!-- Выбор Аватарки -->
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <label style="font-size: 13px; font-weight: 500; color: #757575;">Аватар профиля</label>
+                    <div id="setup-avatars" style="display: flex; gap: 12px; justify-content: space-between;">
+                        <span class="material-icons setup-avatar-opt selected" data-icon="account_circle">account_circle</span>
+                        <span class="material-icons setup-avatar-opt" data-icon="face">face</span>
+                        <span class="material-icons setup-avatar-opt" data-icon="cruelty_free">cruelty_free</span>
+                        <span class="material-icons setup-avatar-opt" data-icon="rocket_launch">rocket_launch</span>
+                        <span class="material-icons setup-avatar-opt" data-icon="local_fire_department">local_fire_department</span>
+                    </div>
+                </div>
+
+                <!-- Выбор Обоев -->
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <label style="font-size: 13px; font-weight: 500; color: #757575;">Обои рабочего стола</label>
+                    <div id="setup-wallpapers" style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <div class="setup-wallpaper-opt" data-url="" style="width: 70px; height: 45px; background: #ECEFF1; border: 2px solid #009688; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #757575;" title="Без обоев"><span class="material-icons" style="font-size: 18px;">block</span></div>
+                        <div class="setup-wallpaper-opt" data-url="https://images.unsplash.com/photo-1506744626753-dba7d41543f4?auto=format&fit=crop&w=1920&q=80" style="width: 70px; height: 45px; background: url('https://images.unsplash.com/photo-1506744626753-dba7d41543f4?auto=format&fit=crop&w=200&q=80') center/cover; border: 2px solid transparent; border-radius: 4px; cursor: pointer;" title="Природа"></div>
+                        <div class="setup-wallpaper-opt" data-url="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=1920&q=80" style="width: 70px; height: 45px; background: url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=200&q=80') center/cover; border: 2px solid transparent; border-radius: 4px; cursor: pointer;" title="Абстракция"></div>
+                        <div class="setup-wallpaper-opt" data-url="https://images.unsplash.com/photo-1538370965046-79c0d6907d47?auto=format&fit=crop&w=1920&q=80" style="width: 70px; height: 45px; background: url('https://images.unsplash.com/photo-1538370965046-79c0d6907d47?auto=format&fit=crop&w=200&q=80') center/cover; border: 2px solid transparent; border-radius: 4px; cursor: pointer;" title="Космос"></div>
+                    </div>
+                </div>
             </div>
             
-            <div class="setup-body" id="step-eula">
-                <p>Перед продолжением установки InbleltOS, пожалуйста, ознакомьтесь с условиями лицензионного соглашения:</p>
-                <div class="eula-text">
-                    ИНБЛЕЛТ ОС ЛИЦЕНЗИОННОЕ СОГЛАШЕНИЕ (EULA)<br><br>
-                    1. Настоящая операционная система эмулируется исключительно в изолированной песочнице браузера пользователя.<br>
-                    2. Вы соглашаетесь, что все создаваемые файлы сохраняются в локальное хранилище IndexedDB браузера и не передаются на сторонние серверы.<br>
-                    3. Разработчики не несут ответственности за сохранность данных при очистке кэша вашего браузера.<br>
-                    4. Запрещается использовать виртуальный браузер в незаконных целях.<br>
-                    5. Все права на симуляцию MD1 принадлежат сообществу энтузиастов InbleltOS.
-                </div>
-                <label style="display: flex; align-items: center; gap: 8px; margin-top: 8px; cursor: pointer;">
-                    <input type="checkbox" id="eula-agree"> Я принимаю все условия данного соглашения
-                </label>
-            </div>
-
-            <div class="setup-body" id="step-disk" style="display: none;">
-                <p>Выберите накопитель для разметки и последующей установки системных файлов:</p>
-                <div class="disk-list">
-                    <div class="disk-item selected" id="vdisk-0">
-                        <div style="display:flex; align-items:center; gap:12px;">
-                            <span class="material-icons" style="color: #5c6bc0;">hdd</span>
-                            <div>
-                                <strong id="vdisk-name">Диск 0: Незанятое пространство</strong><br>
-                                <span style="font-size: 12px; color:#757575;" id="vdisk-desc">Ёмкость: 64.0 ГБ | Доступно: 64.0 ГБ</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div style="display:flex; gap:10px; margin-top: 8px;">
-                    <button id="btn-disk-partition" style="background:#5c6bc0; font-size:12px;">Разметить диск</button>
-                    <button id="btn-disk-format" style="background:#78909c; font-size:12px;" disabled>Форматировать (NTFS)</button>
-                </div>
-            </div>
-
-            <div class="setup-body" id="step-installing" style="display: none;">
-                <p id="install-status-text">Подготовка к копированию файлов...</p>
-                <div class="progress-container">
-                    <div class="progress-bar" id="install-progress"></div>
-                </div>
-                <div style="font-size: 12px; color:#757575; margin-top: 4px;" id="install-percentage">0% выполнено</div>
-            </div>
-
-            <div class="setup-body" id="step-user" style="display: none;">
-                <p>Задайте имя администратора системы и защитный пароль (необязательно):</p>
-                <div style="display: flex; flex-direction: column; gap: 16px;">
-                    <div style="display: flex; flex-direction: column; gap: 4px;">
-                        <label style="font-size: 12px; font-weight: 500; color: #757575;">Имя администратора *</label>
-                        <input type="text" id="setup-username" placeholder="Например: Admin" style="border-bottom-color: #3F51B5;">
-                    </div>
-                    <div style="display: flex; flex-direction: column; gap: 4px;">
-                        <label style="font-size: 12px; font-weight: 500; color: #757575;">Пароль доступа</label>
-                        <input type="password" id="setup-password" placeholder="Оставьте пустым, если пароль не нужен" style="border-bottom-color: #3F51B5;">
-                    </div>
-                </div>
-            </div>
-
-            <div class="setup-body" id="step-wallpaper" style="display: none;">
-                <p>Выберите тему оформления и фоновое изображение для вашего рабочего стола:</p>
-                <div class="setup-wallpaper-grid">
-                    <div class="setup-wp-thumb selected" data-url="" style="background-color: #ECEFF1; display:flex; align-items:center; justify-content:center; border: 1px solid #B0BEC5;" title="Стандартный цвет">
-                        <span class="material-icons" style="color:#757575;">texture</span>
-                    </div>
-                    <div class="setup-wp-thumb" data-url="https://images.unsplash.com/photo-1506744626753-dba7d41543f4?auto=format&fit=crop&w=800&q=80" style="background-image: url('https://images.unsplash.com/photo-1506744626753-dba7d41543f4?auto=format&fit=crop&w=150&q=80');"></div>
-                    <div class="setup-wp-thumb" data-url="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=800&q=80" style="background-image: url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=150&q=80');"></div>
-                    <div class="setup-wp-thumb" data-url="https://images.unsplash.com/photo-1538370965046-79c0d6907d47?auto=format&fit=crop&w=800&q=80" style="background-image: url('https://images.unsplash.com/photo-1538370965046-79c0d6907d47?auto=format&fit=crop&w=150&q=80');"></div>
-                </div>
-            </div>
-
-            <div class="setup-footer">
-                <span style="font-size: 12px; color: #9E9E9E;" id="setup-step-counter">Шаг 1 из 5</span>
-                <button id="setup-next-btn" disabled>Далее</button>
+            <div style="display: flex; justify-content: flex-end; margin-top: 16px;">
+                <button id="setup-submit-btn" style="background: #009688; padding: 10px 24px; font-size: 14px;">Установить систему</button>
             </div>
         </div>
     </div>
 
+    <!-- Экран входа -->
     <div id="login-screen">
         <h1 class="login-title">Вход в InbleltOS</h1>
         <div id="login-users-list"></div>
         
-        <div id="password-container" style="display: none; background: #FFFFFF; padding: 32px; border-radius: 2px; box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14); flex-direction: column; align-items: center; min-width: 280px; gap: 16px;">
-            <span class="material-icons" style="font-size: 72px; color: #009688;">account_circle</span>
+        <div id="password-container" style="display: none; background: #FFFFFF; padding: 32px; border-radius: 2px; box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 1px 5px 0 rgba(0,0,0,0.12), 0 3px 1px -2px rgba(0,0,0,0.2); flex-direction: column; align-items: center; min-width: 280px; gap: 16px; animation: fadeIn 0.2s ease;">
+            <span id="password-target-avatar" class="material-icons" style="font-size: 72px; color: #009688;">account_circle</span>
             <span id="password-target-user" style="font-size: 20px; font-weight: 500; color: #212121;">Пользователь</span>
             <input type="password" id="login-password-input" placeholder="Введите пароль" style="width: 100%;">
             <div id="login-error-msg" style="color: #F44336; font-size: 14px; display: none; font-weight: 500;">Неверный пароль!</div>
@@ -321,6 +273,7 @@
         </div>
     </div>
 
+    <!-- Рабочий стол -->
     <div id="desktop">
         <div class="desktop-icon" onclick="launchApp('explorer')">
             <span class="material-icons" style="color: #FFB300;">folder</span>
@@ -374,13 +327,13 @@
             <span class="material-icons" style="color: #FFB300;">folder</span> Проводник
         </div>
         <div class="start-menu-item" onclick="launchApp('store')">
-            <span class="material-icons" style="color: #E91E63;">storefront</span> Магазин
+            <span class="material-icons" style="color: #E91E63;">storefront</span> Магазин приложений
         </div>
         <div class="start-menu-item" onclick="launchApp('tasks')">
             <span class="material-icons" style="color: #2196F3;">task_alt</span> Задачи
         </div>
         <div class="start-menu-item" onclick="launchApp('browser')">
-            <span class="material-icons" style="color: #F44336;">language</span> Браузер
+            <span class="material-icons" style="color: #F44336;">language</span> Обозреватель
         </div>
         <div class="start-menu-item" onclick="launchApp('notepad')">
             <span class="material-icons" style="color: #FF9800;">edit</span> Блокнот
@@ -393,7 +346,7 @@
         </div>
         <div style="height: 1px; background: #E0E0E0; margin: 8px 0;"></div>
         <div class="start-menu-item" onclick="logoutSystem()">
-            <span class="material-icons" style="color: #757575;">power_settings_new</span> Перезагрузить
+            <span class="material-icons" style="color: #757575;">power_settings_new</span> Завершение работы
         </div>
     </div>
 
@@ -402,34 +355,39 @@
             <span class="material-icons">apps</span>
         </div>
         <div id="taskbar-apps"></div>
-        <div id="user-display" onclick="logoutSystem()">
-            <span class="material-icons">account_circle</span>
+        <div id="user-display" onclick="logoutSystem()" title="Сменить пользователя / Выйти">
+            <span class="material-icons" id="current-user-avatar">account_circle</span>
             <span id="current-user-name">Гость</span>
         </div>
         <div id="clock">00:00</div>
     </div>
 
     <script>
-        // --- Перехватывание Системных Окон (Alert) ---
+        // --- Глобальное Перехватывание Системных Окон (Alert) ---
         window.alert = function(message) {
             const overlay = document.createElement('div');
             overlay.style.cssText = "position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.4); z-index: 200000; display: flex; align-items: center; justify-content: center; animation: fadeIn 0.2s ease;";
+            
             overlay.innerHTML = `
-                <div style="background: #FFFFFF; min-width: 280px; max-width: 420px; padding: 24px; border-radius: 2px; box-shadow: 0 24px 38px 3px rgba(0,0,0,0.2); animation: windowAppear 0.2s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; gap: 12px;">
-                    <h3 style="margin: 0; font-weight: 500; font-size: 20px; color: #212121; display: flex; align-items: center; gap: 8px;">
+                <div style="background: #FFFFFF; min-width: 280px; max-width: 420px; padding: 24px; border-radius: 2px; box-shadow: 0 9px 46px 8px rgba(0,0,0,0.14), 0 11px 15px -7px rgba(0,0,0,0.12), 0 24px 38px 3px rgba(0,0,0,0.2); animation: windowAppear 0.2s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; gap: 12px;">
+                    <h3 style="margin-top: 0; margin-bottom: 0; font-weight: 500; font-size: 20px; color: #212121; display: flex; align-items: center; gap: 8px;">
                         <span class="material-icons" style="color: #FF4081;">info</span> Система
                     </h3>
-                    <div style="font-size: 15px; color: #757575; line-height: 1.5; white-space: pre-wrap;">${message}</div>
+                    <div style="font-size: 15px; color: #757575; line-height: 1.5; white-space: pre-wrap; word-break: break-word; padding: 4px 0 12px 0;">${message}</div>
                     <div style="display: flex; justify-content: flex-end;">
-                        <button id="os-alert-ok-btn" style="background: transparent; color: #FF4081; box-shadow: none; padding: 8px 16px;">ОК</button>
+                        <button id="os-alert-ok-btn" style="background: transparent; color: #FF4081; box-shadow: none; font-weight: 500; font-size: 14px; padding: 8px 16px;">ОК</button>
                     </div>
                 </div>
             `;
+            
             document.body.appendChild(overlay);
-            overlay.querySelector('#os-alert-ok-btn').onclick = () => { overlay.remove(); };
+            
+            const okBtn = overlay.querySelector('#os-alert-ok-btn');
+            okBtn.style.cursor = `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="28" viewBox="0 0 24 28"><path d="M2 2 L14 14 H8.5 L12 21.5 L9.5 22.5 L6 15 L2 19 V2 Z" fill="%23FF4081" stroke="%23ffffff" stroke-width="1.5" stroke-linejoin="round"/></svg>') 2 2, pointer`;
+            
+            okBtn.onclick = () => { overlay.remove(); };
         };
 
-        // --- Изолированная Виртуальная Файловая Система (IndexedDB) ---
         const VFS = {
             db: null,
             init() {
@@ -442,17 +400,15 @@
                         }
                     };
                     request.onsuccess = (e) => { this.db = e.target.result; resolve(); };
-                    request.onerror = () => { console.error("Ошибка VFS"); resolve(); };
+                    request.onerror = () => { console.error("Ошибка инициализации файловой системы VFS"); resolve(); };
                 });
             },
             addFile(username, name, type, blob) {
                 return new Promise((resolve) => {
                     let transaction = this.db.transaction("files", "readwrite");
                     let store = transaction.objectStore("files");
-                    store.add({
-                        username: username, name: name, type: type || "application/octet-stream",
-                        size: blob.size, blob: blob, date: new Date().toLocaleString()
-                    });
+                    let fileRecord = { username: username, name: name, type: type || "application/octet-stream", size: blob.size, blob: blob, date: new Date().toLocaleString() };
+                    store.add(fileRecord);
                     transaction.oncomplete = () => { window.dispatchEvent(new CustomEvent('vfs_changed')); resolve(true); };
                 });
             },
@@ -479,13 +435,15 @@
 
         // Глобальные переменные ОС
         let currentUser = null;
-        let selectedUserObj = null;
-        let setupCurrentStep = 1;
-        let selectedSetupWallpaper = "";
-        let isDiskPartitioned = false;
-        let isDiskFormatted = false;
-
+        let currentUserAvatar = 'account_circle';
+        let selectedUserObj = null; 
+        
         let usersList = JSON.parse(localStorage.getItem('os_users_list') || '[]');
+        if (usersList.length > 0 && typeof usersList[0] === 'string') {
+            usersList = usersList.map(username => ({ name: username, password: "", avatar: "account_circle" }));
+            localStorage.setItem('os_users_list', JSON.stringify(usersList));
+        }
+
         let installedApps = JSON.parse(localStorage.getItem('os_installed_apps') || '{}');
         let highestZIndex = 100;
 
@@ -493,147 +451,52 @@
         function saveUserData(key, value) { localStorage.setItem(getUserKey(key), value); }
         function loadUserData(key) { return localStorage.getItem(getUserKey(key)); }
 
-        // --- Управление Мастером Первоначальной Настройки (Setup Wizard) ---
-        const nextBtn = document.getElementById('setup-next-btn');
-        const stepCounter = document.getElementById('setup-step-counter');
-        const stepTitle = document.getElementById('setup-step-title');
-        const setupIcon = document.getElementById('setup-icon');
-
-        // Шаг 1: Контроль соглашения
-        document.getElementById('eula-agree').addEventListener('change', (e) => {
-            if(setupCurrentStep === 1) nextBtn.disabled = !e.target.checked;
+        // --- Логика OOBE Выбора Аватарок и Обоев ---
+        let selectedSetupAvatar = 'account_circle';
+        document.querySelectorAll('.setup-avatar-opt').forEach(opt => {
+            opt.addEventListener('click', () => {
+                document.querySelectorAll('.setup-avatar-opt').forEach(o => o.classList.remove('selected'));
+                opt.classList.add('selected');
+                selectedSetupAvatar = opt.dataset.icon;
+            });
         });
 
-        // Шаг 2: Разметка диска
-        document.getElementById('btn-disk-partition').addEventListener('click', () => {
-            isDiskPartitioned = true;
-            document.getElementById('vdisk-name').innerText = "Основной раздел C: (InbleltFS)";
-            document.getElementById('vdisk-desc').innerText = "Ёмкость: 63.5 ГБ | Свободно: 63.5 ГБ (Не отформатирован)";
-            document.getElementById('btn-disk-format').disabled = false;
-            document.getElementById('btn-disk-partition').disabled = true;
+        let selectedSetupWallpaper = '';
+        document.querySelectorAll('.setup-wallpaper-opt').forEach(opt => {
+            opt.addEventListener('click', () => {
+                document.querySelectorAll('.setup-wallpaper-opt').forEach(o => o.style.borderColor = 'transparent');
+                opt.style.borderColor = '#009688';
+                selectedSetupWallpaper = opt.dataset.url;
+            });
         });
 
-        document.getElementById('btn-disk-format').addEventListener('click', () => {
-            if(!isDiskPartitioned) return;
-            document.getElementById('btn-disk-format').innerText = "Форматирование...";
-            document.getElementById('btn-disk-format').disabled = true;
+        // --- Логика Установки ---
+        document.getElementById('setup-submit-btn').addEventListener('click', () => {
+            const username = document.getElementById('setup-username').value.trim();
+            const password = document.getElementById('setup-password').value;
+
+            if (!username) {
+                alert('Пожалуйста, введите имя пользователя для продолжения.');
+                return;
+            }
+
+            document.getElementById('setup-screen').style.display = 'none';
+            const bootScreen = document.getElementById('boot-screen');
+            bootScreen.style.display = 'flex'; // Показываем экран загрузки/установки
+
+            // Имитируем процесс установки 30 секунд
             setTimeout(() => {
-                isDiskFormatted = true;
-                document.getElementById('vdisk-desc').innerText = "Ёмкость: 63.5 ГБ | Свободно: 63.5 ГБ (Исправен, NTFS)";
-                document.getElementById('btn-disk-format').innerText = "Готово";
-                if(setupCurrentStep === 2) nextBtn.disabled = false;
-            }, 1500);
-        });
-
-        // Шаг 5: Фоновые обои в установщике
-        document.querySelectorAll('.setup-wp-thumb').forEach(thumb => {
-            thumb.onclick = () => {
-                document.querySelectorAll('.setup-wp-thumb').forEach(t => t.classList.remove('selected'));
-                thumb.classList.add('selected');
-                selectedSetupWallpaper = thumb.dataset.url;
-            };
-        });
-
-        nextBtn.onclick = () => {
-            if (setupCurrentStep === 1) {
-                // Переход к разметке дисков
-                document.getElementById('step-eula').style.display = 'none';
-                document.getElementById('step-disk').style.display = 'flex';
-                setupCurrentStep = 2;
-                stepTitle.innerText = "Выбор и разметка диска";
-                setupIcon.innerText = "dns";
-                nextBtn.disabled = !isDiskFormatted;
-            } else if (setupCurrentStep === 2) {
-                // Имитация распаковки и установки файлов системы
-                document.getElementById('step-disk').style.display = 'none';
-                document.getElementById('step-installing').style.display = 'flex';
-                setupCurrentStep = 3;
-                stepTitle.innerText = "Копирование системных файлов";
-                setupIcon.innerText = "hourglass_top";
-                nextBtn.disabled = true;
-                runFakeInstallation();
-            } else if (setupCurrentStep === 4) {
-                // Переход к обоям
-                const username = document.getElementById('setup-username').value.trim();
-                if (!username) { alert('Введите имя администратора.'); return; }
-                document.getElementById('step-user').style.display = 'none';
-                document.getElementById('step-wallpaper').style.display = 'flex';
-                setupCurrentStep = 5;
-                stepTitle.innerText = "Персонализация";
-                setupIcon.innerText = "palette";
-                nextBtn.innerText = "Завершить";
-            } else if (setupCurrentStep === 5) {
-                // Финал установки
-                const username = document.getElementById('setup-username').value.trim();
-                const password = document.getElementById('setup-password').value;
-                
                 localStorage.setItem('os_installed', 'true');
-                usersList = [{ name: username, password: password }];
+                usersList = [{ name: username, password: password, avatar: selectedSetupAvatar }];
                 localStorage.setItem('os_users_list', JSON.stringify(usersList));
-
-                // Сохранение стартовых обоев в профиль только что созданного юзера
+                
+                // Сохраняем обои для нового пользователя
                 localStorage.setItem(`os_${username}_bg_image`, selectedSetupWallpaper);
 
-                document.getElementById('setup-screen').style.display = 'none';
-                
-                // Перезагрузка для эффекта "первого настоящего включения"
-                showBootScreen(() => { initLoginScreen(); });
-            }
-            stepCounter.innerText = `Шаг ${setupCurrentStep} из 5`;
-        };
-
-        function runFakeInstallation() {
-            let progress = 0;
-            const bar = document.getElementById('install-progress');
-            const percentText = document.getElementById('install-percentage');
-            const statusText = document.getElementById('install-status-text');
-
-            const statuses = [
-                { p: 10, t: "Развертывание файловой структуры ядра..." },
-                { p: 35, t: "Распаковка базовых библиотек MD1 UI..." },
-                { p: 60, t: "Инициализация виртуальной СУБД Изолированного Проводника..." },
-                { p: 85, t: "Регистрация встроенных приложений ОС..." },
-                { p: 100, t: "Завершение конфигурации реестра..." }
-            ];
-
-            const interval = setInterval(() => {
-                progress += 2;
-                if(progress > 100) progress = 100;
-                bar.style.width = progress + '%';
-                percentText.innerText = progress + '% выполнено';
-
-                let currentStatus = statuses.find(s => progress <= s.p);
-                if(currentStatus) statusText.innerText = currentStatus.t;
-
-                if (progress >= 100) {
-                    clearInterval(interval);
-                    // Переходим автоматически на шаг создания пользователя
-                    setTimeout(() => {
-                        document.getElementById('step-installing').style.display = 'none';
-                        document.getElementById('step-user').style.display = 'flex';
-                        setupCurrentStep = 4;
-                        stepTitle.innerText = "Учетная запись";
-                        setupIcon.innerText = "person_add";
-                        stepCounter.innerText = `Шаг ${setupCurrentStep} из 5`;
-                        nextBtn.disabled = false;
-                    }, 800);
-                }
-            }, 80);
-        }
-
-        // --- Логика Имитации Загрузки (Boot Screen Animation) ---
-        function showBootScreen(callback) {
-            const boot = document.getElementById('boot-screen');
-            boot.style.display = 'flex';
-            boot.style.opacity = '1';
-            setTimeout(() => {
-                boot.style.opacity = '0';
-                setTimeout(() => {
-                    boot.style.display = 'none';
-                    if(callback) callback();
-                }, 500);
-            }, 3000); // 3 секунды заставка
-        }
+                bootScreen.style.display = 'none';
+                initLoginScreen();
+            }, 30000); // Ровно 30 секунд
+        });
 
         // --- Логика входа ---
         function initLoginScreen() {
@@ -652,20 +515,22 @@
                 card.className = 'login-user-card';
                 card.onclick = () => handleUserSelection(userObj);
                 card.innerHTML = `
-                    <span class="material-icons avatar">account_circle</span>
+                    <span class="material-icons avatar">${userObj.avatar || 'account_circle'}</span>
                     <span>${userObj.name}</span>
-                    ${userObj.password ? '<span class="material-icons" style="position: absolute; top: 12px; right: 12px; color: #757575; font-size: 18px;">lock</span>' : ''}
+                    ${userObj.password ? '<span class="material-icons" style="position: absolute; top: 12px; right: 12px; color: #757575; font-size: 18px;" title="Требуется пароль">lock</span>' : ''}
                 `;
                 listEl.appendChild(card);
             });
         }
 
         function handleUserSelection(userObj) {
-            if (!userObj.password) { loginSystem(userObj.name); } 
-            else {
+            if (!userObj.password) {
+                loginSystem(userObj.name, userObj.avatar);
+            } else {
                 selectedUserObj = userObj;
                 document.getElementById('login-users-list').style.display = 'none';
                 document.getElementById('password-container').style.display = 'flex';
+                document.getElementById('password-target-avatar').innerText = userObj.avatar || 'account_circle';
                 document.getElementById('password-target-user').innerText = userObj.name;
                 document.getElementById('login-password-input').focus();
             }
@@ -674,25 +539,39 @@
         function verifyLoginPassword() {
             const passInput = document.getElementById('login-password-input');
             const errorMsg = document.getElementById('login-error-msg');
-            if (selectedUserObj && passInput.value === selectedUserObj.password) { loginSystem(selectedUserObj.name); } 
-            else { errorMsg.style.display = 'block'; passInput.value = ''; passInput.focus(); }
+            
+            if (selectedUserObj && passInput.value === selectedUserObj.password) {
+                loginSystem(selectedUserObj.name, selectedUserObj.avatar);
+            } else {
+                errorMsg.style.display = 'block';
+                passInput.value = '';
+                passInput.focus();
+            }
         }
 
         document.getElementById('password-back-btn').onclick = initLoginScreen;
         document.getElementById('password-submit-btn').onclick = verifyLoginPassword;
-        document.getElementById('login-password-input').onkeypress = (e) => { if (e.key === 'Enter') verifyLoginPassword(); };
+        document.getElementById('login-password-input').onkeypress = (e) => {
+            if (e.key === 'Enter') verifyLoginPassword();
+        };
 
-        function loginSystem(username) {
+        function loginSystem(username, avatar) {
             currentUser = username;
+            currentUserAvatar = avatar || 'account_circle';
+            
             localStorage.setItem('os_current_user', username);
             document.getElementById('current-user-name').innerText = currentUser;
+            document.getElementById('current-user-avatar').innerText = currentUserAvatar;
 
             const savedBg = loadUserData('bg_color');
             const savedImg = loadUserData('bg_image');
 
             document.body.style.backgroundColor = savedBg || '#ECEFF1';
-            if (savedImg) { document.body.style.backgroundImage = `url('${savedImg}')`; } 
-            else { document.body.style.backgroundImage = ''; }
+            if (savedImg) {
+                document.body.style.backgroundImage = `url('${savedImg}')`;
+            } else {
+                document.body.style.backgroundImage = '';
+            }
 
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('desktop').style.display = 'flex';
@@ -702,24 +581,26 @@
         function logoutSystem() {
             currentUser = null;
             localStorage.removeItem('os_current_user');
+            
             document.getElementById('desktop').style.display = 'none';
             document.getElementById('taskbar').style.display = 'none';
             document.getElementById('start-menu').style.display = 'none';
-            document.body.style.backgroundColor = '#000000';
+            document.body.style.backgroundColor = '#ECEFF1';
             document.body.style.backgroundImage = '';
 
             document.querySelectorAll('.window').forEach(w => w.remove());
             document.getElementById('taskbar-apps').innerHTML = '';
             
-            // Имитация цикличной перезагрузки
-            showBootScreen(() => { initLoginScreen(); });
+            initLoginScreen();
         }
 
         function updateClock() {
             const now = new Date();
-            document.getElementById('clock').innerText = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+            document.getElementById('clock').innerText = 
+                `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
         }
-        setInterval(updateClock, 1000); updateClock();
+        setInterval(updateClock, 1000);
+        updateClock();
 
         function toggleStartMenu() {
             const menu = document.getElementById('start-menu');
@@ -729,7 +610,9 @@
         document.addEventListener('click', (e) => {
             const startBtn = document.getElementById('start-btn');
             const startMenu = document.getElementById('start-menu');
-            if (startBtn && startMenu && !startBtn.contains(e.target) && !startMenu.contains(e.target)) startMenu.style.display = 'none';
+            if (startBtn && startMenu && !startBtn.contains(e.target) && !startMenu.contains(e.target)) {
+                startMenu.style.display = 'none';
+            }
             document.getElementById('context-menu').style.display = 'none';
         });
 
@@ -737,23 +620,30 @@
             if (e.target.id === 'desktop') {
                 e.preventDefault();
                 const cm = document.getElementById('context-menu');
-                cm.style.top = `${e.clientY}px`; cm.style.left = `${e.clientX}px`; cm.style.display = 'block';
+                cm.style.top = `${e.clientY}px`;
+                cm.style.left = `${e.clientX}px`;
+                cm.style.display = 'block';
                 document.getElementById('start-menu').style.display = 'none';
             }
         });
+        window.addEventListener('contextmenu', (e) => {
+            if (e.target.id !== 'desktop' && !e.target.closest('.app-browser-container')) {
+                e.preventDefault();
+            }
+        });
 
-        // --- Стандартные Приложения Системы ---
+        // --- Реестр Приложений (сокращено для примера, функционал сохранен полностью) ---
         const AppRegistry = {
             'explorer': {
                 icon: 'folder', title: 'Проводник', width: 650, height: 450, color: '#FFB300',
                 content: `
                     <div style="padding: 16px; display: flex; flex-direction: column; height: 100%; box-sizing: border-box; background: #FAFAFA;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                            <h3 style="margin: 0; font-weight: 500; font-size: 18px; color: #37474F;">Локальный диск (C:)</h3>
+                            <h3 style="margin: 0; font-weight: 500; font-size: 18px; color: #37474F;">Локальное изолированное хранилище</h3>
                         </div>
-                        <div style="flex-grow: 1; border: 1px solid #E0E0E0; background: #FFF; overflow-y:auto;">
+                        <div style="flex-grow: 1; border: 1px solid #E0E0E0; border-radius: 2px; overflow-y: auto; background: #FFF;">
                             <table class="explorer-table">
-                                <thead><tr><th>Имя файла</th><th>Тип</th><th>Размер</th><th>Дата</th><th style="text-align:right;">Действия</th></tr></thead>
+                                <thead><tr><th>Имя файла</th><th>Тип</th><th>Размер</th><th>Дата</th><th></th></tr></thead>
                                 <tbody id="explorer-list-tbody"></tbody>
                             </table>
                         </div>
@@ -765,16 +655,16 @@
                         tbody.innerHTML = '';
                         VFS.getFiles(currentUser).then(files => {
                             if (files.length === 0) {
-                                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #757575; padding: 24px;">Раздел чист. Сохраните файлы из Блокнота.</td></tr>`;
+                                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #757575; padding: 24px;">Хранилище пусто.</td></tr>`;
                                 return;
                             }
                             files.forEach(file => {
                                 const tr = document.createElement('tr');
                                 tr.innerHTML = `
-                                    <td><span class="material-icons" style="vertical-align:middle; font-size:18px; margin-right:8px; color:#757575;">description</span>${file.name}</td>
-                                    <td>${file.type}</td>
+                                    <td style="font-weight: 500;">${file.name}</td>
+                                    <td style="color: #757575;">${file.type.split('/')[1] || 'unknown'}</td>
                                     <td>${(file.size / 1024).toFixed(1)} КБ</td>
-                                    <td>${file.date}</td>
+                                    <td style="color: #757575;">${file.date}</td>
                                     <td style="text-align: right;"><button class="exp-del-btn material-icons" data-id="${file.id}" style="background:transparent; color:#F44336; box-shadow:none; padding:4px;">delete</button></td>
                                 `;
                                 tbody.appendChild(tr);
@@ -785,148 +675,189 @@
                         });
                     };
                     renderFiles();
-                    window.addEventListener('vfs_changed', renderFiles);
+                    const updateListener = () => renderFiles();
+                    window.addEventListener('vfs_changed', updateListener);
+                    win.addEventListener('close_window_event', () => window.removeEventListener('vfs_changed', updateListener));
                 }
-            },
-            'store': {
-                icon: 'storefront', title: 'Магазин', width: 500, height: 400, color: '#E91E63',
-                content: `<div style="padding:24px; color:#757575; text-align:center;"><span class="material-icons" style="font-size:48px;">update</span><br><br>Сетевой каталог приложений временно недоступен в данной сборке.</div>`
-            },
-            'notepad': {
-                icon: 'description', title: 'Блокнот', width: 500, height: 400, color: '#FF9800',
-                content: `
-                    <div style="display: flex; flex-direction: column; height: 100%;">
-                        <div style="padding: 8px; background: #EEEEEE; display: flex; gap: 8px;">
-                            <input type="text" id="np-filename" value="документ.txt" style="flex-grow: 1; font-size: 14px;">
-                            <button id="np-save-vfs" style="background: #FF9800; font-size:12px;">Сохранить на C:</button>
-                        </div>
-                        <textarea class="app-notepad" style="flex-grow: 1; border: none; padding: 16px; resize: none; outline: none;"></textarea>
-                    </div>
-                `,
-                init: (win) => {
-                    const ta = win.querySelector('.app-notepad');
-                    const filenameInput = win.querySelector('#np-filename');
-                    ta.value = loadUserData('notepad_text') || '';
-                    ta.addEventListener('input', () => saveUserData('notepad_text', ta.value));
-                    win.querySelector('#np-save-vfs').onclick = () => {
-                        const name = filenameInput.value.trim() || 'Без_имени.txt';
-                        VFS.addFile(currentUser, name, 'text/plain', new Blob([ta.value], {type:'text/plain'})).then(() => {
-                            alert(`Файл "${name}" успешно сохранен на виртуальный диск C:!`);
-                        });
-                    };
-                }
-            },
-            'browser': {
-                icon: 'language', title: 'Браузер', width: 700, height: 500, color: '#F44336',
-                content: `
-                    <div class="app-browser-container">
-                        <div class="app-browser-bar">
-                            <input type="text" class="browser-url" value="https://ru.wikipedia.org" style="flex-grow:1;">
-                            <button class="browser-go" style="background:#F44336;">Перейти</button>
-                        </div>
-                        <div class="browser-frames-container" style="flex-grow:1;"><iframe src="https://ru.wikipedia.org" style="width:100%; height:100%; border:none;"></iframe></div>
-                    </div>
-                `
-            },
-            'tasks': {
-                icon: 'task_alt', title: 'Задачи', width: 400, height: 450, color: '#2196F3',
-                content: `<div class="app-tasks"><div class="task-input-row"><input type="text" id="new-task-input" placeholder="Новое дело..."><button id="add-task-btn">ОК</button></div><ul class="task-list" id="task-list"></ul></div>`,
-                init: (win) => {
-                    const input = win.querySelector('#new-task-input');
-                    const list = win.querySelector('#task-list');
-                    let tasks = JSON.parse(loadUserData('tasks') || '[]');
-                    const render = () => {
-                        list.innerHTML = '';
-                        tasks.forEach((t, i) => {
-                            const li = document.createElement('li'); li.className = 'task-item';
-                            li.innerHTML = `<span>${t.text}</span><button class="material-icons" style="font-size:16px;" onclick="window.delTask(${i})">delete</button>`;
-                            list.appendChild(li);
-                        });
-                    };
-                    win.querySelector('#add-task-btn').onclick = () => {
-                        if(input.value.trim()) { tasks.push({text: input.value.trim()}); input.value=''; saveUserData('tasks', JSON.stringify(tasks)); render(); }
-                    };
-                    window.delTask = (idx) => { tasks.splice(idx,1); saveUserData('tasks', JSON.stringify(tasks)); render(); };
-                    render();
-                }
-            },
-            'calculator': {
-                icon: 'calculate', title: 'Калькулятор', width: 300, height: 400, color: '#673AB7',
-                content: `<div class="app-calc"><div class="app-calc-display" id="cd">0</div><div class="app-calc-grid"><button class="app-calc-btn" onclick="document.getElementById('cd').innerText+=7">7</button><button class="app-calc-btn" onclick="document.getElementById('cd').innerText+=8">8</button><button class="app-calc-btn" onclick="document.getElementById('cd').innerText+=9">9</button><button class="app-calc-btn op" onclick="document.getElementById('cd').innerText='0'">C</button></div></div>`
-            },
-            'terminal': {
-                icon: 'terminal', title: 'Терминал', width: 500, height: 350, color: '#37474F',
-                content: `<div class="app-terminal"><div class="app-terminal-output">InbleltOS [Изолированное ядро]<br>Введите 'help' для просмотра списка доступных команд.<br><br></div><div class="app-terminal-input-row"><span>$</span><input type="text" class="app-terminal-input"></div></div>`
             },
             'settings': {
-                icon: 'settings', title: 'Настройки', width: 450, height: 450, color: '#607D8B',
+                icon: 'settings', title: 'Настройки', width: 450, height: 530, color: '#607D8B',
                 content: `
                     <div class="app-settings">
                         <div class="settings-nav">
-                            <button class="settings-tab-btn active">Оформление</button>
+                            <button class="settings-tab-btn active" data-target="settings-theme">Оформление</button>
+                            <button class="settings-tab-btn" data-target="settings-users">Аккаунты</button>
+                            <button class="settings-tab-btn" data-target="settings-apps">Приложения</button>
                         </div>
                         <div class="settings-content">
-                            <h3>Обои рабочего стола</h3>
-                            <div class="color-picker-row">
-                                <label style="flex-grow:1;">Сплошной цвет фона</label>
-                                <input type="color" id="bg-col" value="#ECEFF1">
+                            <div id="settings-theme" class="settings-section active">
+                                <h3>Оформление стола</h3>
+                                <p style="color: #757575; font-size: 14px;">Цвет и обои применяются для профиля <b><span class="set-curr-user"></span></b>.</p>
+                                <div class="color-picker-row"><label style="flex-grow: 1; font-size: 16px;">Основной цвет</label><input type="color" id="bg-color-picker"></div>
+                                <h4 style="margin-top: 24px; margin-bottom: 8px; color: #212121; font-weight: 500; font-size: 16px;">Обои</h4>
+                                <div id="wallpaper-grid" style="display: flex; gap: 12px; flex-wrap: wrap;">
+                                    <div class="wallpaper-thumb" data-url="" style="width: 80px; height: 50px; background: #ECEFF1; border: 2px solid #CFD8DC; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #757575;" title="Без обоев"><span class="material-icons">block</span></div>
+                                    <div class="wallpaper-thumb" data-url="https://images.unsplash.com/photo-1506744626753-dba7d41543f4?auto=format&fit=crop&w=1920&q=80" style="width: 80px; height: 50px; background: url('https://images.unsplash.com/photo-1506744626753-dba7d41543f4?auto=format&fit=crop&w=200&q=80') center/cover; border: 2px solid transparent; border-radius: 4px; cursor: pointer;"></div>
+                                    <div class="wallpaper-thumb" data-url="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=1920&q=80" style="width: 80px; height: 50px; background: url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=200&q=80') center/cover; border: 2px solid transparent; border-radius: 4px; cursor: pointer;"></div>
+                                    <div class="wallpaper-thumb" data-url="https://images.unsplash.com/photo-1538370965046-79c0d6907d47?auto=format&fit=crop&w=1920&q=80" style="width: 80px; height: 50px; background: url('https://images.unsplash.com/photo-1538370965046-79c0d6907d47?auto=format&fit=crop&w=200&q=80') center/cover; border: 2px solid transparent; border-radius: 4px; cursor: pointer;"></div>
+                                </div>
+                                <div style="margin-top: 24px;"><button id="reset-bg-btn" style="background: transparent; color: #607D8B; box-shadow: none;">СБРОСИТЬ ВСЕ</button></div>
+                            </div>
+                            <div id="settings-users" class="settings-section">
+                                <h3>Управление пользователями</h3>
+                                <ul class="task-list" id="settings-users-list" style="margin-bottom: 16px; border: 1px solid #E0E0E0; max-height: 160px;"></ul>
+                                <div class="task-input-row" style="margin-bottom:0; flex-direction: column; gap: 8px; align-items: stretch;">
+                                    <input type="text" id="new-user-input" placeholder="Имя нового пользователя">
+                                    <input type="password" id="new-user-pass" placeholder="Пароль (пусто — без пароля)">
+                                    <button id="add-user-btn" style="background: #009688; align-self: flex-end; margin-top: 4px;">Добавить</button>
+                                </div>
+                            </div>
+                            <div id="settings-apps" class="settings-section">
+                                <h3>Установленные программы</h3>
+                                <ul class="task-list" id="settings-apps-list" style="border: 1px solid #E0E0E0; max-height: 260px; overflow-y:auto;"></ul>
                             </div>
                         </div>
                     </div>
                 `,
                 init: (win) => {
-                    win.querySelector('#bg-col').oninput = (e) => {
-                        document.body.style.backgroundImage = '';
+                    const tabBtns = win.querySelectorAll('.settings-tab-btn');
+                    const sections = win.querySelectorAll('.settings-section');
+                    tabBtns.forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            tabBtns.forEach(b => b.classList.remove('active'));
+                            sections.forEach(s => s.classList.remove('active'));
+                            btn.classList.add('active');
+                            win.querySelector(`#${btn.dataset.target}`).classList.add('active');
+                        });
+                    });
+
+                    win.querySelectorAll('.set-curr-user').forEach(el => el.innerText = currentUser);
+
+                    const colorPicker = win.querySelector('#bg-color-picker');
+                    colorPicker.value = loadUserData('bg_color') || '#ECEFF1';
+                    colorPicker.addEventListener('input', (e) => {
                         document.body.style.backgroundColor = e.target.value;
                         saveUserData('bg_color', e.target.value);
-                        saveUserData('bg_image', '');
+                    });
+
+                    const wallpaperThumbs = win.querySelectorAll('.wallpaper-thumb');
+                    const applyWallpaper = (url) => {
+                        document.body.style.backgroundImage = url ? `url('${url}')` : '';
+                        saveUserData('bg_image', url);
+                        wallpaperThumbs.forEach(t => t.style.borderColor = (t.dataset.url === url) ? '#009688' : 'transparent');
+                        if(!url) wallpaperThumbs[0].style.borderColor = '#CFD8DC';
                     };
+                    applyWallpaper(loadUserData('bg_image') || '');
+                    wallpaperThumbs.forEach(thumb => thumb.addEventListener('click', () => applyWallpaper(thumb.dataset.url)));
+
+                    win.querySelector('#reset-bg-btn').addEventListener('click', () => {
+                        localStorage.removeItem(getUserKey('bg_color')); localStorage.removeItem(getUserKey('bg_image'));
+                        document.body.style.backgroundColor = '#ECEFF1'; colorPicker.value = '#ECEFF1'; applyWallpaper('');
+                    });
+
+                    const usersListContainer = win.querySelector('#settings-users-list');
+                    const renderSettingsUsers = () => {
+                        usersListContainer.innerHTML = '';
+                        usersList.forEach(u => {
+                            const li = document.createElement('li');
+                            li.className = 'task-item';
+                            li.innerHTML = `
+                                <div style="display:flex; align-items:center; gap:12px;">
+                                    <span class="material-icons">${u.avatar || 'account_circle'}</span>
+                                    <span>${u.name}</span>
+                                </div>
+                                ${u.name !== currentUser ? `<button class="delete-user-btn" data-user="${u.name}" style="background:transparent; color:#F44336; box-shadow:none;">УДАЛИТЬ</button>` : ''}
+                            `;
+                            usersListContainer.appendChild(li);
+                        });
+                    };
+                    usersListContainer.addEventListener('click', (e) => {
+                        if(e.target.classList.contains('delete-user-btn')) {
+                            usersList = usersList.filter(user => user.name !== e.target.dataset.user);
+                            localStorage.setItem('os_users_list', JSON.stringify(usersList));
+                            renderSettingsUsers(); initLoginScreen(); 
+                        }
+                    });
+
+                    const addNewUser = () => {
+                        const name = win.querySelector('#new-user-input').value.trim();
+                        const password = win.querySelector('#new-user-pass').value;
+                        if (name && !usersList.some(user => user.name === name)) {
+                            usersList.push({ name, password, avatar: 'account_circle' });
+                            localStorage.setItem('os_users_list', JSON.stringify(usersList));
+                            win.querySelector('#new-user-input').value = ''; win.querySelector('#new-user-pass').value = '';
+                            renderSettingsUsers(); initLoginScreen();
+                        }
+                    };
+                    win.querySelector('#add-user-btn').addEventListener('click', addNewUser);
+                    renderSettingsUsers();
                 }
             }
         };
 
         function launchApp(appId) {
-            const app = AppRegistry[appId]; if(!app) return;
+            const app = AppRegistry[appId];
+            if(!app) return;
+
             document.getElementById('start-menu').style.display = 'none';
 
-            const windowEl = document.createElement('div'); windowEl.className = 'window';
+            const windowEl = document.createElement('div');
+            windowEl.className = 'window';
+            
+            const openedWindows = document.querySelectorAll('.window').length;
+            const offset = 40 + (openedWindows * 30);
+            windowEl.style.top = `${offset}px`; windowEl.style.left = `${offset}px`;
             windowEl.style.width = `${app.width}px`; windowEl.style.height = `${app.height}px`;
-            windowEl.style.top = '80px'; windowEl.style.left = '80px';
 
             windowEl.innerHTML = `
                 <div class="title-bar" style="background-color: ${app.color};">
                     <div class="title-info"><span class="material-icons">${app.icon}</span> ${app.title}</div>
                     <div class="window-controls">
-                        <span class="material-icons close-btn">close</span>
+                        <span class="material-icons close-btn" title="Закрыть">close</span>
                     </div>
                 </div>
                 <div class="window-content">${app.content}</div>
             `;
 
-            const tbItem = document.createElement('div'); tbItem.className = 'taskbar-item active';
-            tbItem.innerHTML = `<span class="material-icons" style="color:${app.color};">${app.icon}</span> ${app.title}`;
+            const tbItem = document.createElement('div');
+            tbItem.className = 'taskbar-item active';
+            tbItem.innerHTML = `<span class="material-icons" style="color: ${app.color};">${app.icon}</span> ${app.title}`;
             document.getElementById('taskbar-apps').appendChild(tbItem);
 
-            highestZIndex++; windowEl.style.zIndex = highestZIndex;
-            windowEl.onmousedown = () => { highestZIndex++; windowEl.style.zIndex = highestZIndex; };
+            const bringToFront = () => { highestZIndex++; windowEl.style.zIndex = highestZIndex; };
+            bringToFront(); windowEl.addEventListener('mousedown', bringToFront);
 
             windowEl.querySelector('.close-btn').onclick = () => { windowEl.remove(); tbItem.remove(); };
+
+            let isDragging = false; let currentX, currentY, initialX, initialY; let xOffset = 0, yOffset = 0;
+            windowEl.querySelector('.title-bar').addEventListener('mousedown', (e) => {
+                initialX = e.clientX - xOffset; initialY = e.clientY - yOffset;
+                if (!e.target.classList.contains('material-icons')) { isDragging = true; document.addEventListener('mousemove', drag); document.addEventListener('mouseup', dragEnd); }
+            });
+            function drag(e) { if (isDragging) { e.preventDefault(); currentX = e.clientX - initialX; currentY = e.clientY - initialY; xOffset = currentX; yOffset = currentY; windowEl.style.transform = `translate(${currentX}px, ${currentY}px)`; } }
+            function dragEnd() { isDragging = false; document.removeEventListener('mousemove', drag); document.removeEventListener('mouseup', dragEnd); }
+
             document.getElementById('desktop').appendChild(windowEl);
             if(app.init) app.init(windowEl);
         }
 
-        // --- Главный процесс проверки установки и запуска ОС ---
+        // --- Главный процесс инициализации (Boot) ---
         function bootSystem() {
-            showBootScreen(() => {
-                const isInstalled = localStorage.getItem('os_installed');
-                if (!isInstalled || usersList.length === 0) {
-                    // Системы нет -> Включаем инсталлятор на Шаге 1
-                    document.getElementById('setup-screen').style.display = 'flex';
-                } else {
-                    // Система установлена -> На экран входа
+            const isInstalled = localStorage.getItem('os_installed');
+            const bootScreen = document.getElementById('boot-screen');
+
+            // Проверка на отсутствие флага установки или отсутствие юзеров вообще
+            if (!isInstalled || usersList.length === 0) {
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('setup-screen').style.display = 'flex';
+            } else {
+                // Обычная загрузка ОС при уже установленной системе
+                bootScreen.style.display = 'flex';
+                setTimeout(() => {
+                    bootScreen.style.display = 'none';
                     initLoginScreen();
-                }
-            });
+                }, 2000);
+            }
         }
 
         VFS.init().then(() => {
