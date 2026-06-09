@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>InbleltOS (Strict Sandbox)</title>
+    <title>InbleltOS 10.01 Matterhorn</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -252,7 +252,6 @@
 </head>
 <body>
 
-    <!-- Экран первоначальной настройки (OOBE) -->
     <div id="setup-screen">
         <div class="setup-box">
             <h1 class="setup-title"><span class="material-icons" style="font-size: 36px;">explore</span> Добро пожаловать</h1>
@@ -275,7 +274,6 @@
         </div>
     </div>
 
-    <!-- Экран входа -->
     <div id="login-screen">
         <h1 class="login-title">Вход в InbleltOS</h1>
         <div id="login-users-list"></div>
@@ -292,7 +290,6 @@
         </div>
     </div>
 
-    <!-- Рабочий стол -->
     <div id="desktop">
         <div class="desktop-icon" onclick="launchApp('explorer')">
             <span class="material-icons" style="color: #FFB300;">folder</span>
@@ -1085,7 +1082,7 @@
                 icon: 'terminal', title: 'Терминал', width: 550, height: 350, color: '#37474F',
                 content: `
                     <div class="app-terminal">
-                        <div class="app-terminal-output" id="term-out">InbleltOS [Version 1.0]<br><br></div>
+                        <div class="app-terminal-output" id="term-out">InbleltOS [Version 10.01 Matterhorn]<br><br></div>
                         <div class="app-terminal-input-row">
                             <span id="term-prompt"></span>
                             <input type="text" id="term-in" class="app-terminal-input" autocomplete="off">
@@ -1104,7 +1101,7 @@
                             input.value = '';
                             if(val === 'help') output.innerHTML += `<div>Доступно: help, date, clear, calc, store, explorer, exit</div>`;
                             else if(val === 'date') output.innerHTML += `<div>${new Date().toString()}</div>`;
-                            else if(val === 'clear') output.innerHTML = 'InbleltOS [Version 1.0]<br><br>';
+                            else if(val === 'clear') output.innerHTML = 'InbleltOS [Version 10.01 Matterhorn]<br><br>';
                             else if(val === 'calc') launchApp('calculator');
                             else if(val === 'store') launchApp('store');
                             else if(val === 'explorer') launchApp('explorer');
@@ -1172,7 +1169,6 @@
                 icon: 'settings', title: 'Настройки', width: 450, height: 530, color: '#607D8B',
                 content: `
                     <div class="app-settings">
-                        <!-- Блок с версией системы -->
                         <div style="background: #ECEFF1; text-align: center; padding: 8px; font-size: 13px; color: #455A64; font-weight: 500; border-bottom: 1px solid #CFD8DC;">
                             <span class="material-icons" style="font-size: 14px; vertical-align: middle; margin-right: 4px;">landscape</span>
                             InbleltOS Version 10.01 Matterhorn
@@ -1195,30 +1191,22 @@
                                 
                                 <h4 style="margin-top: 24px; margin-bottom: 8px; color: #212121; font-weight: 500; font-size: 16px;">Обои рабочего стола (Matterhorn Collection)</h4>
                                 <div id="wallpaper-grid" style="display: flex; gap: 12px; flex-wrap: wrap;">
-                                    <!-- Опция: Без обоев -->
                                     <div class="wallpaper-thumb" data-url="" style="width: 80px; height: 50px; background: #ECEFF1; border: 2px solid #CFD8DC; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #757575;" title="Без обоев">
                                         <span class="material-icons" style="font-size: 20px;">block</span>
                                     </div>
                                     
-                                    <!-- Маттерхорн ДЕНЬ -->
                                     <div class="wallpaper-thumb" data-url="https://images.unsplash.com/photo-1534067783921-91c384be527a?q=80&w=1920&auto=format&fit=crop" style="width: 80px; height: 50px; background: url('https://images.unsplash.com/photo-1534067783921-91c384be527a?q=80&w=200&auto=format&fit=crop') center/cover; border: 2px solid transparent; border-radius: 4px; cursor: pointer;" title="Маттерхорн: День"></div>
                                     
-                                    <!-- Маттерхорн ВЕЧЕР -->
                                     <div class="wallpaper-thumb" data-url="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=1920&auto=format&fit=crop" style="width: 80px; height: 50px; background: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=200&auto=format&fit=crop') center/cover; border: 2px solid transparent; border-radius: 4px; cursor: pointer;" title="Маттерхорн: Вечер"></div>
                                     
-                                    <!-- Маттерхорн НОЧЬ -->
                                     <div class="wallpaper-thumb" data-url="https://images.unsplash.com/photo-1549880181-56a44cf4a9a1?q=80&w=1920&auto=format&fit=crop" style="width: 80px; height: 50px; background: url('https://images.unsplash.com/photo-1549880181-56a44cf4a9a1?q=80&w=200&auto=format&fit=crop') center/cover; border: 2px solid transparent; border-radius: 4px; cursor: pointer;" title="Маттерхорн: Ночь"></div>
 
-                                    <!-- Маттерхорн РАССВЕТ (Новое) -->
                                     <div class="wallpaper-thumb" data-url="https://images.unsplash.com/photo-1528650743849-c5c2fc71aab4?q=80&w=1920&auto=format&fit=crop" style="width: 80px; height: 50px; background: url('https://images.unsplash.com/photo-1528650743849-c5c2fc71aab4?q=80&w=200&auto=format&fit=crop') center/cover; border: 2px solid transparent; border-radius: 4px; cursor: pointer;" title="Маттерхорн: Рассвет"></div>
 
-                                    <!-- Маттерхорн ЗИМА (Новое) -->
                                     <div class="wallpaper-thumb" data-url="https://images.unsplash.com/photo-1518730518541-d0843268c287?q=80&w=1920&auto=format&fit=crop" style="width: 80px; height: 50px; background: url('https://images.unsplash.com/photo-1518730518541-d0843268c287?q=80&w=200&auto=format&fit=crop') center/cover; border: 2px solid transparent; border-radius: 4px; cursor: pointer;" title="Маттерхорн: Зима"></div>
 
-                                    <!-- Маттерхорн ОБЛАКА (Новое) -->
                                     <div class="wallpaper-thumb" data-url="https://images.unsplash.com/photo-1600100397608-250810777085?q=80&w=1920&auto=format&fit=crop" style="width: 80px; height: 50px; background: url('https://images.unsplash.com/photo-1600100397608-250810777085?q=80&w=200&auto=format&fit=crop') center/cover; border: 2px solid transparent; border-radius: 4px; cursor: pointer;" title="Маттерхорн: Облака"></div>
                                     
-                                    <!-- Маттерхорн МИНИМАЛИЗМ (Новое) -->
                                     <div class="wallpaper-thumb" data-url="https://images.unsplash.com/photo-1553105659-d081f407b71c?q=80&w=1920&auto=format&fit=crop" style="width: 80px; height: 50px; background: url('https://images.unsplash.com/photo-1553105659-d081f407b71c?q=80&w=200&auto=format&fit=crop') center/cover; border: 2px solid transparent; border-radius: 4px; cursor: pointer;" title="Маттерхорн: Минимализм"></div>
                                 </div>
 
@@ -1398,6 +1386,7 @@
                     renderInstalledAppsList();
                 }
             }
+        };
 
         function registerSingleCustomApp(appId, appData) {
             AppRegistry[appId] = {
