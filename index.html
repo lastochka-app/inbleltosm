@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>InbleltOS 10.01 Matterhorn</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
@@ -44,9 +44,12 @@
             position: fixed;
             top: 0; left: 0;
             width: 100vw; height: 100vh;
-            background-color: #ECEFF1;
+            background-color: #263238;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
             z-index: 99999;
-            display: none; /* Скрыт по умолчанию, управляется скриптом */
+            display: none; 
             align-items: center;
             justify-content: center;
             flex-direction: column;
@@ -55,12 +58,30 @@
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        .login-title {
-            font-size: 32px;
+        #login-clock {
+            font-size: 80px;
+            font-weight: 300;
+            color: #FFFFFF;
+            margin-bottom: 4px;
+            text-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            letter-spacing: -1px;
+        }
+
+        #login-date {
+            font-size: 20px;
             font-weight: 400;
-            color: #37474F;
-            margin-bottom: 48px;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            color: rgba(255, 255, 255, 0.85);
+            margin-bottom: 40px;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+            text-transform: capitalize;
+        }
+
+        .login-title {
+            font-size: 22px;
+            font-weight: 400;
+            color: #FFFFFF;
+            margin-bottom: 24px;
+            text-shadow: 0 2px 6px rgba(0,0,0,0.4);
         }
 
         #login-users-list {
@@ -72,21 +93,24 @@
         }
 
         .login-user-card {
-            background: #FFFFFF;
-            padding: 32px;
-            border-radius: 2px;
-            box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 1px 5px 0 rgba(0,0,0,0.12), 0 3px 1px -2px rgba(0,0,0,0.2);
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 24px 32px;
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
             display: flex;
             flex-direction: column;
             align-items: center;
             cursor: pointer !important;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
             min-width: 140px;
             position: relative;
         }
         .login-user-card:hover {
             transform: translateY(-4px);
-            box-shadow: 0 8px 10px 1px rgba(0,0,0,0.14), 0 3px 14px 2px rgba(0,0,0,0.12), 0 5px 5px -3px rgba(0,0,0,0.2);
+            background: #FFFFFF;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
         }
         .login-user-card .material-icons.avatar {
             font-size: 72px;
@@ -94,9 +118,24 @@
             margin-bottom: 16px;
         }
         .login-user-card span {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 500;
             color: #212121;
+        }
+
+        #password-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 32px;
+            border-radius: 8px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            min-width: 280px;
+            gap: 16px;
+            animation: fadeIn 0.2s ease;
         }
 
         /* --- Рабочий Стол и UI --- */
@@ -275,10 +314,12 @@
     </div>
 
     <div id="login-screen">
+        <div id="login-clock">00:00</div>
+        <div id="login-date">Понедельник, 1 января</div>
         <h1 class="login-title">Вход в InbleltOS</h1>
         <div id="login-users-list"></div>
         
-        <div id="password-container" style="display: none; background: #FFFFFF; padding: 32px; border-radius: 2px; box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 1px 5px 0 rgba(0,0,0,0.12), 0 3px 1px -2px rgba(0,0,0,0.2); flex-direction: column; align-items: center; min-width: 280px; gap: 16px; animation: fadeIn 0.2s ease;">
+        <div id="password-container">
             <span class="material-icons" style="font-size: 72px; color: #009688;">account_circle</span>
             <span id="password-target-user" style="font-size: 20px; font-weight: 500; color: #212121;">Пользователь</span>
             <input type="password" id="login-password-input" placeholder="Введите пароль" style="width: 100%;">
@@ -501,20 +542,38 @@
             localStorage.setItem('os_users_list', JSON.stringify(usersList));
 
             document.getElementById('setup-screen').style.display = 'none';
-            initLoginScreen();
-            
-            // Опционально: можно раскомментировать строку ниже для авто-входа после установки
-            // loginSystem(username);
+            initLoginScreen(username);
         });
 
         // --- Логика входа ---
-        function initLoginScreen() {
-            document.getElementById('login-screen').style.display = 'flex';
+        function initLoginScreen(hintUser) {
+            const loginScreenEl = document.getElementById('login-screen');
+            loginScreenEl.style.display = 'flex';
             document.getElementById('login-users-list').style.display = 'flex';
             document.getElementById('password-container').style.display = 'none';
             document.getElementById('login-password-input').value = '';
             document.getElementById('login-error-msg').style.display = 'none';
             selectedUserObj = null;
+
+            // Динамически подтягиваем фон рабочего стола для локскрина
+            const bgUser = hintUser || localStorage.getItem('os_last_user') || (usersList[0] ? usersList[0].name : null);
+            if (bgUser) {
+                localStorage.setItem('os_last_user', bgUser);
+                const savedImg = localStorage.getItem(`os_${bgUser}_bg_image`);
+                const savedBg = localStorage.getItem(`os_${bgUser}_bg_color`);
+                
+                if (savedImg) {
+                    loginScreenEl.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.45)), url('${savedImg}')`;
+                    loginScreenEl.style.backgroundColor = '';
+                } else if (savedBg) {
+                    loginScreenEl.style.backgroundImage = 'none';
+                    loginScreenEl.style.backgroundColor = savedBg;
+                } else {
+                    loginScreenEl.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.45)), url('https://images.unsplash.com/photo-1534067783921-91c384be527a?q=80&w=1920&auto=format&fit=crop')`;
+                }
+            } else {
+                loginScreenEl.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.45)), url('https://images.unsplash.com/photo-1534067783921-91c384be527a?q=80&w=1920&auto=format&fit=crop')`;
+            }
 
             const listEl = document.getElementById('login-users-list');
             listEl.innerHTML = '';
@@ -541,6 +600,17 @@
                 document.getElementById('password-container').style.display = 'flex';
                 document.getElementById('password-target-user').innerText = userObj.name;
                 document.getElementById('login-password-input').focus();
+                
+                // Переключаем обои экрана блокировки на обои выбранного юзера
+                const savedImg = localStorage.getItem(`os_${userObj.name}_bg_image`);
+                const savedBg = localStorage.getItem(`os_${userObj.name}_bg_color`);
+                const loginScreenEl = document.getElementById('login-screen');
+                if (savedImg) {
+                    loginScreenEl.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.45)), url('${savedImg}')`;
+                } else if (savedBg) {
+                    loginScreenEl.style.backgroundImage = 'none';
+                    loginScreenEl.style.backgroundColor = savedBg;
+                }
             }
         }
 
@@ -557,7 +627,7 @@
             }
         }
 
-        document.getElementById('password-back-btn').onclick = initLoginScreen;
+        document.getElementById('password-back-btn').onclick = () => initLoginScreen(selectedUserObj ? selectedUserObj.name : null);
         document.getElementById('password-submit-btn').onclick = verifyLoginPassword;
         document.getElementById('login-password-input').onkeypress = (e) => {
             if (e.key === 'Enter') verifyLoginPassword();
@@ -566,6 +636,7 @@
         function loginSystem(username) {
             currentUser = username;
             localStorage.setItem('os_current_user', username);
+            localStorage.setItem('os_last_user', username);
             document.getElementById('current-user-name').innerText = currentUser;
 
             const savedBg = loadUserData('bg_color');
@@ -584,6 +655,7 @@
         }
 
         function logoutSystem() {
+            const previousUser = currentUser;
             currentUser = null;
             localStorage.removeItem('os_current_user');
             
@@ -596,13 +668,27 @@
             document.querySelectorAll('.window').forEach(w => w.remove());
             document.getElementById('taskbar-apps').innerHTML = '';
             
-            initLoginScreen();
+            initLoginScreen(previousUser);
         }
 
         function updateClock() {
             const now = new Date();
-            document.getElementById('clock').innerText = 
-                `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const timeString = `${hours}:${minutes}`;
+            
+            // Часы в панели задач
+            document.getElementById('clock').innerText = timeString;
+            
+            // Часы на локскрине
+            const loginClock = document.getElementById('login-clock');
+            if (loginClock) loginClock.innerText = timeString;
+            
+            // Дата на локскрине
+            const loginDate = document.getElementById('login-date');
+            if (loginDate) {
+                loginDate.innerText = now.toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' });
+            }
         }
         setInterval(updateClock, 1000);
         updateClock();
@@ -1538,7 +1624,6 @@
         // --- Главный процесс инициализации (Boot) ---
         function bootSystem() {
             const isInstalled = localStorage.getItem('os_installed');
-            // Проверка на отсутствие флага установки или отсутствие юзеров вообще
             if (!isInstalled || usersList.length === 0) {
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('setup-screen').style.display = 'flex';
