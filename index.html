@@ -1172,6 +1172,12 @@
                 icon: 'settings', title: 'Настройки', width: 450, height: 530, color: '#607D8B',
                 content: `
                     <div class="app-settings">
+                        <!-- Блок с версией системы -->
+                        <div style="background: #ECEFF1; text-align: center; padding: 8px; font-size: 13px; color: #455A64; font-weight: 500; border-bottom: 1px solid #CFD8DC;">
+                            <span class="material-icons" style="font-size: 14px; vertical-align: middle; margin-right: 4px;">landscape</span>
+                            InbleltOS Version 10.01 Matterhorn
+                        </div>
+                        
                         <div class="settings-nav">
                             <button class="settings-tab-btn active" data-target="settings-theme">Оформление</button>
                             <button class="settings-tab-btn" data-target="settings-users">Аккаунты</button>
@@ -1187,7 +1193,7 @@
                                     <input type="color" id="bg-color-picker">
                                 </div>
                                 
-                                <h4 style="margin-top: 24px; margin-bottom: 8px; color: #212121; font-weight: 500; font-size: 16px;">Обои рабочего стола</h4>
+                                <h4 style="margin-top: 24px; margin-bottom: 8px; color: #212121; font-weight: 500; font-size: 16px;">Обои рабочего стола (Matterhorn Collection)</h4>
                                 <div id="wallpaper-grid" style="display: flex; gap: 12px; flex-wrap: wrap;">
                                     <!-- Опция: Без обоев -->
                                     <div class="wallpaper-thumb" data-url="" style="width: 80px; height: 50px; background: #ECEFF1; border: 2px solid #CFD8DC; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #757575;" title="Без обоев">
@@ -1202,6 +1208,18 @@
                                     
                                     <!-- Маттерхорн НОЧЬ -->
                                     <div class="wallpaper-thumb" data-url="https://images.unsplash.com/photo-1549880181-56a44cf4a9a1?q=80&w=1920&auto=format&fit=crop" style="width: 80px; height: 50px; background: url('https://images.unsplash.com/photo-1549880181-56a44cf4a9a1?q=80&w=200&auto=format&fit=crop') center/cover; border: 2px solid transparent; border-radius: 4px; cursor: pointer;" title="Маттерхорн: Ночь"></div>
+
+                                    <!-- Маттерхорн РАССВЕТ (Новое) -->
+                                    <div class="wallpaper-thumb" data-url="https://images.unsplash.com/photo-1528650743849-c5c2fc71aab4?q=80&w=1920&auto=format&fit=crop" style="width: 80px; height: 50px; background: url('https://images.unsplash.com/photo-1528650743849-c5c2fc71aab4?q=80&w=200&auto=format&fit=crop') center/cover; border: 2px solid transparent; border-radius: 4px; cursor: pointer;" title="Маттерхорн: Рассвет"></div>
+
+                                    <!-- Маттерхорн ЗИМА (Новое) -->
+                                    <div class="wallpaper-thumb" data-url="https://images.unsplash.com/photo-1518730518541-d0843268c287?q=80&w=1920&auto=format&fit=crop" style="width: 80px; height: 50px; background: url('https://images.unsplash.com/photo-1518730518541-d0843268c287?q=80&w=200&auto=format&fit=crop') center/cover; border: 2px solid transparent; border-radius: 4px; cursor: pointer;" title="Маттерхорн: Зима"></div>
+
+                                    <!-- Маттерхорн ОБЛАКА (Новое) -->
+                                    <div class="wallpaper-thumb" data-url="https://images.unsplash.com/photo-1600100397608-250810777085?q=80&w=1920&auto=format&fit=crop" style="width: 80px; height: 50px; background: url('https://images.unsplash.com/photo-1600100397608-250810777085?q=80&w=200&auto=format&fit=crop') center/cover; border: 2px solid transparent; border-radius: 4px; cursor: pointer;" title="Маттерхорн: Облака"></div>
+                                    
+                                    <!-- Маттерхорн МИНИМАЛИЗМ (Новое) -->
+                                    <div class="wallpaper-thumb" data-url="https://images.unsplash.com/photo-1553105659-d081f407b71c?q=80&w=1920&auto=format&fit=crop" style="width: 80px; height: 50px; background: url('https://images.unsplash.com/photo-1553105659-d081f407b71c?q=80&w=200&auto=format&fit=crop') center/cover; border: 2px solid transparent; border-radius: 4px; cursor: pointer;" title="Маттерхорн: Минимализм"></div>
                                 </div>
 
                                 <div style="margin-top: 24px;">
@@ -1380,7 +1398,6 @@
                     renderInstalledAppsList();
                 }
             }
-        };
 
         function registerSingleCustomApp(appId, appData) {
             AppRegistry[appId] = {
