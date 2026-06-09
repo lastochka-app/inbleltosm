@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>InbleltOS (Strict Sandbox)</title>
-    <!-- Добавлен тонкий шрифт (wght@100) для экрана загрузки -->
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
@@ -24,15 +23,6 @@
             cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="28" viewBox="0 0 24 28"><path d="M2 2 L14 14 H8.5 L12 21.5 L9.5 22.5 L6 15 L2 19 V2 Z" fill="%23212121" stroke="%23ffffff" stroke-width="1.5" stroke-linejoin="round"/></svg>') 2 2, default;
         }
 
-        /* --- Экран Загрузки и Установки --- */
-        #boot-screen {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background-color: #000000; z-index: 9999999;
-            display: none; align-items: center; justify-content: center;
-            font-family: 'Roboto', sans-serif; font-weight: 100; font-size: 56px;
-            color: #FFFFFF; letter-spacing: 2px;
-        }
-
         /* --- Экран Первоначальной Настройки (OOBE) --- */
         #setup-screen {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
@@ -45,14 +35,9 @@
             box-shadow: 0 16px 24px 2px rgba(0,0,0,0.14), 0 6px 30px 5px rgba(0,0,0,0.12), 0 8px 10px -5px rgba(0,0,0,0.2);
             width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 24px;
             animation: windowAppear 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            max-height: 90vh; overflow-y: auto;
         }
         .setup-title { font-size: 28px; font-weight: 500; margin: 0; color: #009688; display: flex; align-items: center; gap: 12px; }
         .setup-desc { font-size: 15px; color: #757575; line-height: 1.5; margin: 0; }
-        
-        .setup-avatar-opt { font-size: 40px; color: #B0BEC5; cursor: pointer; transition: 0.2s; border-radius: 50%; border: 2px solid transparent; padding: 4px; }
-        .setup-avatar-opt:hover { color: #78909C; }
-        .setup-avatar-opt.selected { color: #009688; border-color: #009688; }
 
         /* --- Экран Входа в Систему --- */
         #login-screen {
@@ -61,7 +46,7 @@
             width: 100vw; height: 100vh;
             background-color: #ECEFF1;
             z-index: 99999;
-            display: none;
+            display: none; /* Скрыт по умолчанию, управляется скриптом */
             align-items: center;
             justify-content: center;
             flex-direction: column;
@@ -70,43 +55,98 @@
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        .login-title { font-size: 32px; font-weight: 400; color: #37474F; margin-bottom: 48px; text-shadow: 0 1px 2px rgba(0,0,0,0.1); }
-        #login-users-list { display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; max-width: 800px; }
-        
-        .login-user-card {
-            background: #FFFFFF; padding: 32px; border-radius: 2px;
-            box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 1px 5px 0 rgba(0,0,0,0.12), 0 3px 1px -2px rgba(0,0,0,0.2);
-            display: flex; flex-direction: column; align-items: center;
-            cursor: pointer !important; transition: transform 0.2s, box-shadow 0.2s; min-width: 140px; position: relative;
+        .login-title {
+            font-size: 32px;
+            font-weight: 400;
+            color: #37474F;
+            margin-bottom: 48px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
-        .login-user-card:hover { transform: translateY(-4px); box-shadow: 0 8px 10px 1px rgba(0,0,0,0.14), 0 3px 14px 2px rgba(0,0,0,0.12), 0 5px 5px -3px rgba(0,0,0,0.2); }
-        .login-user-card .material-icons.avatar { font-size: 72px; color: #009688; margin-bottom: 16px; }
-        .login-user-card span { font-size: 20px; font-weight: 500; color: #212121; }
+
+        #login-users-list {
+            display: flex;
+            gap: 24px;
+            justify-content: center;
+            flex-wrap: wrap;
+            max-width: 800px;
+        }
+
+        .login-user-card {
+            background: #FFFFFF;
+            padding: 32px;
+            border-radius: 2px;
+            box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 1px 5px 0 rgba(0,0,0,0.12), 0 3px 1px -2px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer !important;
+            transition: transform 0.2s, box-shadow 0.2s;
+            min-width: 140px;
+            position: relative;
+        }
+        .login-user-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 10px 1px rgba(0,0,0,0.14), 0 3px 14px 2px rgba(0,0,0,0.12), 0 5px 5px -3px rgba(0,0,0,0.2);
+        }
+        .login-user-card .material-icons.avatar {
+            font-size: 72px;
+            color: #009688;
+            margin-bottom: 16px;
+        }
+        .login-user-card span {
+            font-size: 20px;
+            font-weight: 500;
+            color: #212121;
+        }
 
         /* --- Рабочий Стол и UI --- */
-        #desktop { width: 100vw; height: calc(100vh - 48px); position: relative; padding: 16px; box-sizing: border-box; display: none; flex-direction: column; align-content: flex-start; flex-wrap: wrap; gap: 8px; }
-        .desktop-icon, .start-btn, .taskbar-item, .start-menu-item, button, .window-controls .material-icons, #user-display, .context-menu-item { cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="28" viewBox="0 0 24 28"><path d="M2 2 L14 14 H8.5 L12 21.5 L9.5 22.5 L6 15 L2 19 V2 Z" fill="%23FF4081" stroke="%23ffffff" stroke-width="1.5" stroke-linejoin="round"/></svg>') 2 2, pointer !important; }
-        .desktop-icon { width: 90px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px 8px; border-radius: 2px; transition: background-color 0.2s ease; text-align: center; color: #FFFFFF; }
+        #desktop {
+            width: 100vw; height: calc(100vh - 48px);
+            position: relative; padding: 16px; box-sizing: border-box;
+            display: none; 
+            flex-direction: column; align-content: flex-start; flex-wrap: wrap; gap: 8px;
+        }
+
+        .desktop-icon, .start-btn, .taskbar-item, .start-menu-item, button, .window-controls .material-icons, #user-display, .context-menu-item {
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="28" viewBox="0 0 24 28"><path d="M2 2 L14 14 H8.5 L12 21.5 L9.5 22.5 L6 15 L2 19 V2 Z" fill="%23FF4081" stroke="%23ffffff" stroke-width="1.5" stroke-linejoin="round"/></svg>') 2 2, pointer !important;
+        }
+
+        .desktop-icon {
+            width: 90px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 12px 8px; border-radius: 2px; transition: background-color 0.2s ease; text-align: center; color: #FFFFFF;
+        }
         .desktop-icon:hover { background-color: rgba(0, 0, 0, 0.2); }
         .desktop-icon .material-icons { font-size: 48px; margin-bottom: 8px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
         .desktop-icon span { font-size: 13px; font-weight: 500; color: #FFFFFF; text-shadow: 0 1px 3px rgba(0,0,0,0.9), 0 0 4px rgba(0,0,0,0.6); }
 
-        #taskbar { position: fixed; bottom: 0; width: 100%; height: 48px; background-color: #263238; display: none; align-items: center; padding: 0 8px; box-sizing: border-box; z-index: 10000; box-shadow: 0 -2px 4px -1px rgba(0,0,0,0.2), 0 -4px 5px 0 rgba(0,0,0,0.14), 0 -1px 10px 0 rgba(0,0,0,0.12); }
+        #taskbar {
+            position: fixed; bottom: 0; width: 100%; height: 48px; background-color: #263238;
+            display: none;
+            align-items: center; padding: 0 8px; box-sizing: border-box; z-index: 10000;
+            box-shadow: 0 -2px 4px -1px rgba(0,0,0,0.2), 0 -4px 5px 0 rgba(0,0,0,0.14), 0 -1px 10px 0 rgba(0,0,0,0.12);
+        }
+
         .start-btn { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; transition: background-color 0.2s; color: #FFFFFF; }
         .start-btn:hover { background-color: rgba(255, 255, 255, 0.1); }
         .start-btn .material-icons { font-size: 26px; }
+
         #taskbar-apps { display: flex; flex-grow: 1; margin-left: 12px; gap: 6px; overflow-x: auto; }
         #taskbar-apps::-webkit-scrollbar { display: none; }
+        
         .taskbar-item { display: flex; align-items: center; padding: 0 16px; height: 36px; background-color: transparent; color: #B0BEC5; border-radius: 2px; font-size: 14px; font-weight: 500; text-transform: uppercase; transition: background-color 0.15s, color 0.15s; max-width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .taskbar-item:hover { background-color: rgba(255, 255, 255, 0.1); color: #FFFFFF; }
         .taskbar-item.active { background-color: rgba(255, 255, 255, 0.15); color: #FFFFFF; border-bottom: 2px solid #FF4081; }
         .taskbar-item .material-icons { font-size: 18px; margin-right: 8px; }
+
         #user-display { display: flex; align-items: center; padding: 0 12px; height: 36px; border-radius: 2px; color: #FFFFFF; font-size: 14px; font-weight: 500; transition: background-color 0.2s; }
         #user-display:hover { background-color: rgba(255, 255, 255, 0.1); }
         #user-display .material-icons { margin-right: 6px; font-size: 18px; }
+
         #clock { margin-left: 8px; font-size: 14px; font-weight: 500; color: #FFFFFF; padding-right: 8px; cursor: default; }
+
         #start-menu { position: fixed; bottom: 56px; left: 16px; width: 280px; background-color: #FFFFFF; border-radius: 2px; box-shadow: 0 8px 10px 1px rgba(0,0,0,0.14), 0 3px 14px 2px rgba(0,0,0,0.12), 0 5px 5px -3px rgba(0,0,0,0.2); display: none; flex-direction: column; padding: 8px 0; z-index: 9999; transform-origin: bottom left; animation: menuPop 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
         @keyframes menuPop { from { opacity: 0; transform: scale(0.9) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+
         .start-menu-item { display: flex; align-items: center; padding: 12px 24px; font-size: 15px; font-weight: 500; color: #212121; transition: background-color 0.15s; }
         .start-menu-item:hover { background-color: #EEEEEE; }
         .start-menu-item .material-icons { margin-right: 24px; font-size: 24px; color: #757575; }
@@ -115,6 +155,7 @@
         @keyframes windowAppear { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
         .window { position: absolute; background-color: #FAFAFA; color: #212121; border-radius: 2px; box-shadow: 0 16px 24px 2px rgba(0,0,0,0.14), 0 6px 30px 5px rgba(0,0,0,0.12), 0 8px 10px -5px rgba(0,0,0,0.2); display: flex; flex-direction: column; overflow: hidden; transition: opacity 0.2s, width 0.2s, height 0.2s; animation: windowAppear 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
         .window.maximized { top: 0 !important; left: 0 !important; width: 100vw !important; height: calc(100vh - 48px) !important; border-radius: 0; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        
         .title-bar { height: 56px; padding: 0 16px; display: flex; justify-content: space-between; align-items: center; color: #FFFFFF; cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5" fill="%23212121" stroke="%23ffffff" stroke-width="1.5"/></svg>') 12 12, grab !important; box-shadow: 0 2px 5px rgba(0,0,0,0.26); z-index: 10; }
         .window.maximized .title-bar { cursor: default !important; }
         .title-bar:active { cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" fill="%23FF4081" stroke="%23ffffff" stroke-width="1.5"/></svg>') 12 12, grabbing !important; }
@@ -130,13 +171,14 @@
         button:hover { background: #F50057; box-shadow: 0 3px 3px 0 rgba(0,0,0,0.14), 0 1px 7px 0 rgba(0,0,0,0.12), 0 3px 1px -1px rgba(0,0,0,0.2); }
         button:active { background: #C51162; box-shadow: 0 4px 5px 0 rgba(0,0,0,0.14), 0 1px 10px 0 rgba(0,0,0,0.12), 0 2px 4px -1px rgba(0,0,0,0.2); }
         button:disabled { background: #B0BEC5; color: #78909C; box-shadow: none; cursor: not-allowed !important; }
+        
         input[type="text"], input[type="password"] { border: none; border-bottom: 2px solid #B0BEC5; background: transparent; padding: 8px 0; font-size: 16px; outline: none; transition: border-bottom-color 0.2s; font-family: 'Roboto', sans-serif; color: #212121; }
         input[type="text"]:focus, input[type="password"]:focus { border-bottom-color: #3F51B5; }
 
         .app-notepad, input[type="text"], input[type="password"] { cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M12 4v16m-4-16h8m-8 16h8" stroke="%23212121" stroke-width="2" fill="none"/></svg>') 12 12, text !important; }
         .app-terminal, .app-terminal-input { cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M12 4v16m-4-16h8m-8 16h8" stroke="%2300E676" stroke-width="2" fill="none"/></svg>') 12 12, text !important; }
 
-        /* Приложения (свернуты для компактности) */
+        /* Приложения */
         .app-browser-container { display: flex; flex-direction: column; height: 100%; background: #FAFAFA; }
         .app-browser-tabs-container { display: flex; background: #D32F2F; padding: 8px 8px 0 8px; align-items: flex-end; overflow-x: auto; }
         .app-browser-tabs-container::-webkit-scrollbar { height: 4px; }
@@ -182,6 +224,7 @@
         .task-item button:hover { background: rgba(0,0,0,0.05); color: #F44336; }
         .task-item:hover button { opacity: 1; }
 
+        /* Вкладки Настроек */
         .app-settings { display: flex; flex-direction: column; height: 100%; background: #FAFAFA; }
         .settings-nav { display: flex; background: #607D8B; padding: 0 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .settings-tab-btn { background: transparent; color: rgba(255,255,255,0.7); box-shadow: none; border-radius: 0; padding: 16px 24px; border-bottom: 2px solid transparent; font-size: 14px; font-weight: 500; }
@@ -194,11 +237,13 @@
         .color-picker-row { display: flex; align-items: center; gap: 16px; margin-top: 24px; padding: 16px; background: #FFFFFF; border-radius: 2px; box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); }
         .color-picker-row input[type="color"] { cursor: pointer; border: none; width: 48px; height: 48px; padding: 0; background: none; }
 
+        /* Контекстное Меню */
         #context-menu { position: fixed; background-color: #FFFFFF; border-radius: 2px; box-shadow: 0 8px 10px 1px rgba(0,0,0,0.14), 0 3px 14px 2px rgba(0,0,0,0.12), 0 5px 5px -3px rgba(0,0,0,0.2); padding: 8px 0; min-width: 200px; z-index: 20000; display: none; transform-origin: top left; animation: menuPop 0.15s cubic-bezier(0.4, 0, 0.2, 1); }
         .context-menu-item { display: flex; align-items: center; padding: 12px 24px; font-size: 15px; font-weight: 400; color: #212121; transition: background-color 0.15s; }
         .context-menu-item:hover { background-color: #EEEEEE; }
         .context-menu-item .material-icons { margin-right: 24px; font-size: 20px; color: #757575; }
 
+        /* Стили Проводника */
         .explorer-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; background: white; }
         .explorer-table th { background: #ECEFF1; padding: 10px; font-weight: 500; border-bottom: 1px solid #CFD8DC; color: #455A64; }
         .explorer-table td { padding: 10px; border-bottom: 1px solid #F5F5F5; color: #212121; vertical-align: middle; }
@@ -207,14 +252,11 @@
 </head>
 <body>
 
-    <!-- Экран Загрузки и Установки -->
-    <div id="boot-screen">InbleltOS</div>
-
     <!-- Экран первоначальной настройки (OOBE) -->
     <div id="setup-screen">
         <div class="setup-box">
-            <h1 class="setup-title"><span class="material-icons" style="font-size: 36px;">explore</span> Установка InbleltOS</h1>
-            <p class="setup-desc">Настройте свой профиль для начала работы с новой системой.</p>
+            <h1 class="setup-title"><span class="material-icons" style="font-size: 36px;">explore</span> Добро пожаловать</h1>
+            <p class="setup-desc">Похоже, вы запускаете InbleltOS впервые. Давайте выполним первоначальную настройку системы и создадим учетную запись администратора.</p>
             
             <div style="display: flex; flex-direction: column; gap: 16px; margin-top: 8px;">
                 <div style="display: flex; flex-direction: column; gap: 4px;">
@@ -224,29 +266,6 @@
                 <div style="display: flex; flex-direction: column; gap: 4px;">
                     <label style="font-size: 13px; font-weight: 500; color: #757575;">Пароль (необязательно)</label>
                     <input type="password" id="setup-password" placeholder="Введите пароль" style="border-bottom-color: #009688;">
-                </div>
-
-                <!-- Выбор Аватарки -->
-                <div style="display: flex; flex-direction: column; gap: 4px;">
-                    <label style="font-size: 13px; font-weight: 500; color: #757575;">Аватар профиля</label>
-                    <div id="setup-avatars" style="display: flex; gap: 12px; justify-content: space-between;">
-                        <span class="material-icons setup-avatar-opt selected" data-icon="account_circle">account_circle</span>
-                        <span class="material-icons setup-avatar-opt" data-icon="face">face</span>
-                        <span class="material-icons setup-avatar-opt" data-icon="cruelty_free">cruelty_free</span>
-                        <span class="material-icons setup-avatar-opt" data-icon="rocket_launch">rocket_launch</span>
-                        <span class="material-icons setup-avatar-opt" data-icon="local_fire_department">local_fire_department</span>
-                    </div>
-                </div>
-
-                <!-- Выбор Обоев -->
-                <div style="display: flex; flex-direction: column; gap: 4px;">
-                    <label style="font-size: 13px; font-weight: 500; color: #757575;">Обои рабочего стола</label>
-                    <div id="setup-wallpapers" style="display: flex; gap: 8px; flex-wrap: wrap;">
-                        <div class="setup-wallpaper-opt" data-url="" style="width: 70px; height: 45px; background: #ECEFF1; border: 2px solid #009688; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #757575;" title="Без обоев"><span class="material-icons" style="font-size: 18px;">block</span></div>
-                        <div class="setup-wallpaper-opt" data-url="https://images.unsplash.com/photo-1506744626753-dba7d41543f4?auto=format&fit=crop&w=1920&q=80" style="width: 70px; height: 45px; background: url('https://images.unsplash.com/photo-1506744626753-dba7d41543f4?auto=format&fit=crop&w=200&q=80') center/cover; border: 2px solid transparent; border-radius: 4px; cursor: pointer;" title="Природа"></div>
-                        <div class="setup-wallpaper-opt" data-url="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=1920&q=80" style="width: 70px; height: 45px; background: url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=200&q=80') center/cover; border: 2px solid transparent; border-radius: 4px; cursor: pointer;" title="Абстракция"></div>
-                        <div class="setup-wallpaper-opt" data-url="https://images.unsplash.com/photo-1538370965046-79c0d6907d47?auto=format&fit=crop&w=1920&q=80" style="width: 70px; height: 45px; background: url('https://images.unsplash.com/photo-1538370965046-79c0d6907d47?auto=format&fit=crop&w=200&q=80') center/cover; border: 2px solid transparent; border-radius: 4px; cursor: pointer;" title="Космос"></div>
-                    </div>
                 </div>
             </div>
             
@@ -262,7 +281,7 @@
         <div id="login-users-list"></div>
         
         <div id="password-container" style="display: none; background: #FFFFFF; padding: 32px; border-radius: 2px; box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 1px 5px 0 rgba(0,0,0,0.12), 0 3px 1px -2px rgba(0,0,0,0.2); flex-direction: column; align-items: center; min-width: 280px; gap: 16px; animation: fadeIn 0.2s ease;">
-            <span id="password-target-avatar" class="material-icons" style="font-size: 72px; color: #009688;">account_circle</span>
+            <span class="material-icons" style="font-size: 72px; color: #009688;">account_circle</span>
             <span id="password-target-user" style="font-size: 20px; font-weight: 500; color: #212121;">Пользователь</span>
             <input type="password" id="login-password-input" placeholder="Введите пароль" style="width: 100%;">
             <div id="login-error-msg" style="color: #F44336; font-size: 14px; display: none; font-weight: 500;">Неверный пароль!</div>
@@ -356,7 +375,7 @@
         </div>
         <div id="taskbar-apps"></div>
         <div id="user-display" onclick="logoutSystem()" title="Сменить пользователя / Выйти">
-            <span class="material-icons" id="current-user-avatar">account_circle</span>
+            <span class="material-icons">account_circle</span>
             <span id="current-user-name">Гость</span>
         </div>
         <div id="clock">00:00</div>
@@ -388,6 +407,7 @@
             okBtn.onclick = () => { overlay.remove(); };
         };
 
+        // --- Изолированная Виртуальная Файловая Система (IndexedDB) ---
         const VFS = {
             db: null,
             init() {
@@ -399,17 +419,33 @@
                             db.createObjectStore("files", { keyPath: "id", autoIncrement: true });
                         }
                     };
-                    request.onsuccess = (e) => { this.db = e.target.result; resolve(); };
-                    request.onerror = () => { console.error("Ошибка инициализации файловой системы VFS"); resolve(); };
+                    request.onsuccess = (e) => {
+                        this.db = e.target.result;
+                        resolve();
+                    };
+                    request.onerror = () => {
+                        console.error("Ошибка инициализации файловой системы VFS");
+                        resolve();
+                    };
                 });
             },
             addFile(username, name, type, blob) {
                 return new Promise((resolve) => {
                     let transaction = this.db.transaction("files", "readwrite");
                     let store = transaction.objectStore("files");
-                    let fileRecord = { username: username, name: name, type: type || "application/octet-stream", size: blob.size, blob: blob, date: new Date().toLocaleString() };
+                    let fileRecord = {
+                        username: username,
+                        name: name,
+                        type: type || "application/octet-stream",
+                        size: blob.size,
+                        blob: blob,
+                        date: new Date().toLocaleString()
+                    };
                     store.add(fileRecord);
-                    transaction.oncomplete = () => { window.dispatchEvent(new CustomEvent('vfs_changed')); resolve(true); };
+                    transaction.oncomplete = () => {
+                        window.dispatchEvent(new CustomEvent('vfs_changed'));
+                        resolve(true);
+                    };
                 });
             },
             getFiles(username) {
@@ -428,19 +464,21 @@
                     let transaction = this.db.transaction("files", "readwrite");
                     let store = transaction.objectStore("files");
                     store.delete(id);
-                    transaction.oncomplete = () => { window.dispatchEvent(new CustomEvent('vfs_changed')); resolve(true); };
+                    transaction.oncomplete = () => {
+                        window.dispatchEvent(new CustomEvent('vfs_changed'));
+                        resolve(true);
+                    };
                 });
             }
         };
 
         // Глобальные переменные ОС
         let currentUser = null;
-        let currentUserAvatar = 'account_circle';
         let selectedUserObj = null; 
         
         let usersList = JSON.parse(localStorage.getItem('os_users_list') || '[]');
         if (usersList.length > 0 && typeof usersList[0] === 'string') {
-            usersList = usersList.map(username => ({ name: username, password: "", avatar: "account_circle" }));
+            usersList = usersList.map(username => ({ name: username, password: "" }));
             localStorage.setItem('os_users_list', JSON.stringify(usersList));
         }
 
@@ -451,26 +489,7 @@
         function saveUserData(key, value) { localStorage.setItem(getUserKey(key), value); }
         function loadUserData(key) { return localStorage.getItem(getUserKey(key)); }
 
-        // --- Логика OOBE Выбора Аватарок и Обоев ---
-        let selectedSetupAvatar = 'account_circle';
-        document.querySelectorAll('.setup-avatar-opt').forEach(opt => {
-            opt.addEventListener('click', () => {
-                document.querySelectorAll('.setup-avatar-opt').forEach(o => o.classList.remove('selected'));
-                opt.classList.add('selected');
-                selectedSetupAvatar = opt.dataset.icon;
-            });
-        });
-
-        let selectedSetupWallpaper = '';
-        document.querySelectorAll('.setup-wallpaper-opt').forEach(opt => {
-            opt.addEventListener('click', () => {
-                document.querySelectorAll('.setup-wallpaper-opt').forEach(o => o.style.borderColor = 'transparent');
-                opt.style.borderColor = '#009688';
-                selectedSetupWallpaper = opt.dataset.url;
-            });
-        });
-
-        // --- Логика Установки ---
+        // --- Логика OOBE (Первоначальной настройки) ---
         document.getElementById('setup-submit-btn').addEventListener('click', () => {
             const username = document.getElementById('setup-username').value.trim();
             const password = document.getElementById('setup-password').value;
@@ -480,22 +499,15 @@
                 return;
             }
 
+            localStorage.setItem('os_installed', 'true');
+            usersList = [{ name: username, password: password }];
+            localStorage.setItem('os_users_list', JSON.stringify(usersList));
+
             document.getElementById('setup-screen').style.display = 'none';
-            const bootScreen = document.getElementById('boot-screen');
-            bootScreen.style.display = 'flex'; // Показываем экран загрузки/установки
-
-            // Имитируем процесс установки 30 секунд
-            setTimeout(() => {
-                localStorage.setItem('os_installed', 'true');
-                usersList = [{ name: username, password: password, avatar: selectedSetupAvatar }];
-                localStorage.setItem('os_users_list', JSON.stringify(usersList));
-                
-                // Сохраняем обои для нового пользователя
-                localStorage.setItem(`os_${username}_bg_image`, selectedSetupWallpaper);
-
-                bootScreen.style.display = 'none';
-                initLoginScreen();
-            }, 30000); // Ровно 30 секунд
+            initLoginScreen();
+            
+            // Опционально: можно раскомментировать строку ниже для авто-входа после установки
+            // loginSystem(username);
         });
 
         // --- Логика входа ---
@@ -515,7 +527,7 @@
                 card.className = 'login-user-card';
                 card.onclick = () => handleUserSelection(userObj);
                 card.innerHTML = `
-                    <span class="material-icons avatar">${userObj.avatar || 'account_circle'}</span>
+                    <span class="material-icons avatar">account_circle</span>
                     <span>${userObj.name}</span>
                     ${userObj.password ? '<span class="material-icons" style="position: absolute; top: 12px; right: 12px; color: #757575; font-size: 18px;" title="Требуется пароль">lock</span>' : ''}
                 `;
@@ -525,12 +537,11 @@
 
         function handleUserSelection(userObj) {
             if (!userObj.password) {
-                loginSystem(userObj.name, userObj.avatar);
+                loginSystem(userObj.name);
             } else {
                 selectedUserObj = userObj;
                 document.getElementById('login-users-list').style.display = 'none';
                 document.getElementById('password-container').style.display = 'flex';
-                document.getElementById('password-target-avatar').innerText = userObj.avatar || 'account_circle';
                 document.getElementById('password-target-user').innerText = userObj.name;
                 document.getElementById('login-password-input').focus();
             }
@@ -541,7 +552,7 @@
             const errorMsg = document.getElementById('login-error-msg');
             
             if (selectedUserObj && passInput.value === selectedUserObj.password) {
-                loginSystem(selectedUserObj.name, selectedUserObj.avatar);
+                loginSystem(selectedUserObj.name);
             } else {
                 errorMsg.style.display = 'block';
                 passInput.value = '';
@@ -555,13 +566,10 @@
             if (e.key === 'Enter') verifyLoginPassword();
         };
 
-        function loginSystem(username, avatar) {
+        function loginSystem(username) {
             currentUser = username;
-            currentUserAvatar = avatar || 'account_circle';
-            
             localStorage.setItem('os_current_user', username);
             document.getElementById('current-user-name').innerText = currentUser;
-            document.getElementById('current-user-avatar').innerText = currentUserAvatar;
 
             const savedBg = loadUserData('bg_color');
             const savedImg = loadUserData('bg_image');
@@ -632,7 +640,7 @@
             }
         });
 
-        // --- Реестр Приложений (сокращено для примера, функционал сохранен полностью) ---
+        // --- Реестр Приложений ---
         const AppRegistry = {
             'explorer': {
                 icon: 'folder', title: 'Проводник', width: 650, height: 450, color: '#FFB300',
@@ -640,10 +648,19 @@
                     <div style="padding: 16px; display: flex; flex-direction: column; height: 100%; box-sizing: border-box; background: #FAFAFA;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                             <h3 style="margin: 0; font-weight: 500; font-size: 18px; color: #37474F;">Локальное изолированное хранилище</h3>
+                            <span style="color: #009688; font-size: 13px; font-weight: 500; display: flex; align-items: center;"><span class="material-icons" style="font-size: 16px; margin-right: 4px;">lock</span> Строгая изоляция: включена</span>
                         </div>
                         <div style="flex-grow: 1; border: 1px solid #E0E0E0; border-radius: 2px; overflow-y: auto; background: #FFF;">
                             <table class="explorer-table">
-                                <thead><tr><th>Имя файла</th><th>Тип</th><th>Размер</th><th>Дата</th><th></th></tr></thead>
+                                <thead>
+                                    <tr>
+                                        <th>Имя файла</th>
+                                        <th>Тип</th>
+                                        <th>Размер</th>
+                                        <th>Дата добавления</th>
+                                        <th style="text-align: right; padding-right: 16px;">Действия</th>
+                                    </tr>
+                                </thead>
                                 <tbody id="explorer-list-tbody"></tbody>
                             </table>
                         </div>
@@ -651,33 +668,504 @@
                 `,
                 init: (win) => {
                     const tbody = win.querySelector('#explorer-list-tbody');
+
                     const renderFiles = () => {
                         tbody.innerHTML = '';
                         VFS.getFiles(currentUser).then(files => {
                             if (files.length === 0) {
-                                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #757575; padding: 24px;">Хранилище пусто.</td></tr>`;
+                                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #757575; padding: 24px;">Хранилище пусто. Сохраняйте файлы из Блокнота или скачивайте через Браузер ОС.</td></tr>`;
                                 return;
                             }
                             files.forEach(file => {
                                 const tr = document.createElement('tr');
+                                let typeIcon = 'insert_drive_file';
+                                if (file.type.includes('image')) typeIcon = 'image';
+                                else if (file.type.includes('text') || file.name.endsWith('.txt')) typeIcon = 'description';
+                                else if (file.type.includes('zip') || file.type.includes('rar')) typeIcon = 'inventory_2';
+                                
+                                const sizeKb = (file.size / 1024).toFixed(1);
+
                                 tr.innerHTML = `
-                                    <td style="font-weight: 500;">${file.name}</td>
-                                    <td style="color: #757575;">${file.type.split('/')[1] || 'unknown'}</td>
-                                    <td>${(file.size / 1024).toFixed(1)} КБ</td>
-                                    <td style="color: #757575;">${file.date}</td>
-                                    <td style="text-align: right;"><button class="exp-del-btn material-icons" data-id="${file.id}" style="background:transparent; color:#F44336; box-shadow:none; padding:4px;">delete</button></td>
+                                    <td style="display: flex; align-items: center; gap: 8px; font-weight: 500;">
+                                        <span class="material-icons" style="color: #757575;">${typeIcon}</span>
+                                        <span style="max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${file.name}">${file.name}</span>
+                                    </td>
+                                    <td style="color: #757575; font-size: 13px;">${file.type.split('/')[1] || 'unknown'}</td>
+                                    <td>${sizeKb} КБ</td>
+                                    <td style="color: #757575; font-size: 13px;">${file.date}</td>
+                                    <td style="text-align: right; padding-right: 12px;">
+                                        <button class="exp-del-btn material-icons" data-id="${file.id}" style="background:transparent; color:#F44336; box-shadow:none; padding:4px;" title="Удалить безвозвратно">delete</button>
+                                    </td>
                                 `;
                                 tbody.appendChild(tr);
                             });
+
                             tbody.querySelectorAll('.exp-del-btn').forEach(btn => {
-                                btn.onclick = () => VFS.deleteFile(parseInt(btn.dataset.id)).then(() => renderFiles());
+                                btn.onclick = () => {
+                                    VFS.deleteFile(parseInt(btn.dataset.id)).then(() => renderFiles());
+                                };
                             });
                         });
                     };
+
                     renderFiles();
+                    
                     const updateListener = () => renderFiles();
                     window.addEventListener('vfs_changed', updateListener);
-                    win.addEventListener('close_window_event', () => window.removeEventListener('vfs_changed', updateListener));
+                    win.addEventListener('close_window_event', () => {
+                        window.removeEventListener('vfs_changed', updateListener);
+                    });
+                }
+            },
+            'store': {
+                icon: 'storefront', title: 'Магазин приложений', width: 550, height: 450, color: '#E91E63',
+                content: `
+                    <div style="padding: 24px; display: flex; flex-direction: column; height: 100%; box-sizing: border-box; background: #FAFAFA;">
+                        <h3 style="margin-top: 0; font-weight: 500; font-size: 20px; color: #212121; margin-bottom: 4px;">Каталог Inblelt Store</h3>
+                        <p style="color: #757575; margin-bottom: 16px; font-size: 13px; margin-top: 0;">Сканирование репозитория: lastochka-app/inblelt-store</p>
+                        <div id="store-loader" style="text-align: center; padding: 48px; color: #757575; font-size: 15px;">
+                            <span class="material-icons" style="animation: spin 1.5s linear infinite; font-size: 32px; vertical-align: middle; margin-right: 12px; color: #E91E63;">refresh</span> Загрузка приложений...
+                        </div>
+                        <ul class="task-list" id="store-apps-list" style="display: none; flex-grow: 1; overflow-y: auto; background: #FFFFFF; border: 1px solid #E0E0E0;"></ul>
+                    </div>
+                `,
+                init: (win) => {
+                    const loader = win.querySelector('#store-loader');
+                    const list = win.querySelector('#store-apps-list');
+
+                    fetch('https://api.github.com/repos/lastochka-app/inblelt-store/contents/')
+                        .then(res => {
+                            if (!res.ok) throw new Error('Не удалось связаться с репозиторием GitHub API');
+                            return res.json();
+                        })
+                        .then(data => {
+                            loader.style.display = 'none';
+                            list.style.display = 'block';
+                            list.innerHTML = '';
+
+                            const icappFiles = data.filter(item => item.name.toLowerCase().endsWith('.icapp') && item.type === 'file');
+
+                            if (icappFiles.length === 0) {
+                                list.innerHTML = '<li class="task-item" style="color: #757575; justify-content: center;">Нет доступных пакетов .icapp в корне репозитория</li>';
+                                return;
+                            }
+
+                            icappFiles.forEach(file => {
+                                const li = document.createElement('li');
+                                li.className = 'task-item';
+                                const appDisplayName = file.name.replace(/\.icapp$/i, '');
+                                
+                                li.innerHTML = `
+                                    <div style="display:flex; align-items:center; gap:12px;">
+                                        <span class="material-icons" style="color: #E91E63; font-size: 28px;">extension</span>
+                                        <div style="display:flex; flex-direction:column;">
+                                            <span style="font-size:16px; font-weight:500; color:#212121;">${appDisplayName}</span>
+                                            <span style="font-size:12px; color:#757575;">Размер: ${(file.size / 1024).toFixed(1)} КБ</span>
+                                        </div>
+                                    </div>
+                                    <button class="store-install-btn" data-url="${file.download_url}" data-name="${appDisplayName}" style="background: #E91E63;">Установить</button>
+                                `;
+                                list.appendChild(li);
+                            });
+
+                            list.querySelectorAll('.store-install-btn').forEach(btn => {
+                                btn.addEventListener('click', () => {
+                                    const fileUrl = btn.dataset.url;
+                                    const appName = btn.dataset.name;
+                                    
+                                    btn.disabled = true;
+                                    btn.innerText = 'Загрузка...';
+
+                                    fetch(fileUrl)
+                                        .then(r => { if (!r.ok) throw new Error('Ошибка скачивания файла'); return r.arrayBuffer(); })
+                                        .then(buffer => {
+                                            btn.innerText = 'Сборка...';
+                                            return JSZip.loadAsync(buffer);
+                                        })
+                                        .then(zip => {
+                                            const manifestFile = zip.file("manifest.json");
+                                            const htmlFile = zip.file("index.html");
+
+                                            if (!manifestFile || !htmlFile) {
+                                                throw new Error("Ошибка структуры: архив должен содержать manifest.json и index.html");
+                                            }
+
+                                            return Promise.all([manifestFile.async("string"), htmlFile.async("string")])
+                                                .then(results => ({ zip, manifest: JSON.parse(results[0]), htmlContent: results[1] }));
+                                        })
+                                        .then(({ zip, manifest, htmlContent }) => {
+                                            const appId = manifest.id || 'app_' + Date.now();
+                                            const cssFile = zip.file("style.css");
+                                            const jsFile = zip.file("script.js");
+                                            const filePromises = [];
+                                            let finalHtml = htmlContent;
+
+                                            if (cssFile) {
+                                                filePromises.push(cssFile.async("string").then(css => {
+                                                    if (finalHtml.includes('</head>')) finalHtml = finalHtml.replace('</head>', `<style>${css}</style></head>`);
+                                                    else finalHtml = `<style>${css}</style>` + finalHtml;
+                                                }));
+                                            }
+                                            if (jsFile) {
+                                                filePromises.push(jsFile.async("string").then(js => {
+                                                    if (finalHtml.includes('</body>')) finalHtml = finalHtml.replace('</body>', `<script>${js}<\/script></body>`);
+                                                    else finalHtml = finalHtml + `<script>${js}<\/script>`;
+                                                }));
+                                            }
+
+                                            return Promise.all(filePromises).then(() => {
+                                                installedApps[appId] = {
+                                                    title: manifest.title || appName,
+                                                    icon: manifest.icon || 'extension',
+                                                    color: manifest.color || '#9C27B0',
+                                                    width: manifest.width || 500,
+                                                    height: manifest.height || 400,
+                                                    htmlContent: finalHtml
+                                                };
+
+                                                localStorage.setItem('os_installed_apps', JSON.stringify(installedApps));
+                                                registerSingleCustomApp(appId, installedApps[appId]);
+                                                renderCustomDesktopIcons();
+
+                                                btn.innerText = 'Готово';
+                                                btn.style.background = '#4CAF50';
+                                                alert(`Приложение "${manifest.title || appName}" успешно установлено из Магазина!`);
+                                            });
+                                        })
+                                        .catch(err => {
+                                            alert("Не удалось установить приложение: " + err.message);
+                                            btn.disabled = false;
+                                            btn.innerText = 'Установить';
+                                        });
+                                });
+                            });
+                        })
+                        .catch(err => {
+                            loader.innerHTML = `<span class="material-icons" style="color:#F44336; vertical-align:middle; margin-right:8px;">error</span> Ошибка подключения: ${err.message}`;
+                        });
+                }
+            },
+            'tasks': {
+                icon: 'task_alt', title: 'Задачи', width: 450, height: 500, color: '#2196F3',
+                content: `
+                    <div class="app-tasks">
+                        <div class="task-input-row">
+                            <input type="text" id="new-task-input" placeholder="Новая задача...">
+                            <button id="add-task-btn">Добавить</button>
+                        </div>
+                        <ul class="task-list" id="task-list"></ul>
+                    </div>
+                `,
+                init: (win) => {
+                    const input = win.querySelector('#new-task-input');
+                    const btn = win.querySelector('#add-task-btn');
+                    const list = win.querySelector('#task-list');
+                    let tasks = JSON.parse(loadUserData('tasks') || '[]');
+
+                    const saveTasks = () => saveUserData('tasks', JSON.stringify(tasks));
+
+                    const renderTasks = () => {
+                        list.innerHTML = '';
+                        tasks.forEach((t, i) => {
+                            const li = document.createElement('li');
+                            li.className = `task-item ${t.completed ? 'completed' : ''}`;
+                            li.innerHTML = `
+                                <label style="display:flex; align-items:center; gap:16px; cursor:pointer; flex-grow:1;">
+                                    <input type="checkbox" ${t.completed ? 'checked' : ''} data-index="${i}">
+                                    <span style="font-size:16px;">${t.text}</span>
+                                </label>
+                                <button class="material-icons" data-index="${i}" style="font-size:20px;">delete</button>
+                            `;
+                            list.appendChild(li);
+                        });
+                    };
+
+                    list.addEventListener('change', (e) => {
+                        if(e.target.tagName === 'INPUT') {
+                            tasks[e.target.dataset.index].completed = e.target.checked;
+                            saveTasks(); renderTasks();
+                        }
+                    });
+
+                    list.addEventListener('click', (e) => {
+                        if(e.target.tagName === 'BUTTON') {
+                            tasks.splice(e.target.dataset.index, 1);
+                            saveTasks(); renderTasks();
+                        }
+                    });
+
+                    const addTask = () => {
+                        const text = input.value.trim();
+                        if(text) { tasks.push({ text, completed: false }); input.value = ''; saveTasks(); renderTasks(); }
+                    };
+
+                    btn.addEventListener('click', addTask);
+                    input.addEventListener('keypress', (e) => { if(e.key === 'Enter') addTask(); });
+                    renderTasks();
+                }
+            },
+            'notepad': {
+                icon: 'description', title: 'Блокнот', width: 500, height: 400, color: '#FF9800',
+                content: `
+                    <div style="display: flex; flex-direction: column; height: 100%; background: #FAFAFA;">
+                        <div style="padding: 8px 16px; background: #EEEEEE; display: flex; gap: 8px; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); z-index: 2;">
+                            <input type="text" id="np-filename" value="Новый_документ.txt" style="flex-grow: 1; padding: 4px 8px; font-size: 14px; border: 1px solid #CFD8DC; border-radius: 2px; outline: none;">
+                            <button id="np-save-vfs" style="background: #FF9800; color: white; padding: 6px 16px; font-size: 13px;">СОХРАНИТЬ В ПРОВОДНИК</button>
+                        </div>
+                        <textarea class="app-notepad" placeholder="Начните вводить текст..." style="flex-grow: 1; border: none; padding: 16px; resize: none; outline: none;"></textarea>
+                    </div>
+                `,
+                init: (win) => {
+                    const ta = win.querySelector('.app-notepad');
+                    const filenameInput = win.querySelector('#np-filename');
+                    const saveBtn = win.querySelector('#np-save-vfs');
+                    
+                    ta.value = loadUserData('notepad_text') || ''; 
+                    ta.addEventListener('input', () => saveUserData('notepad_text', ta.value));
+
+                    saveBtn.addEventListener('click', () => {
+                        const name = filenameInput.value.trim() || 'Без_имени.txt';
+                        const text = ta.value;
+                        const blob = new Blob([text], { type: 'text/plain' });
+                        VFS.addFile(currentUser, name, 'text/plain', blob).then(() => {
+                            alert(`Файл "${name}" успешно сохранен в изолированный Проводник!`);
+                        });
+                    });
+                } 
+            },
+            'browser': {
+                icon: 'language', title: 'Обозреватель', width: 850, height: 600, color: '#F44336',
+                content: `
+                    <div class="app-browser-container">
+                        <div class="app-browser-tabs-container">
+                            <div class="browser-tabs"></div>
+                            <button class="browser-new-tab material-icons" style="background: transparent; color: #FFF; box-shadow: none; padding: 4px; margin-bottom: 4px;" title="Новая вкладка">add</button>
+                        </div>
+                        <div class="app-browser-bar">
+                            <button class="browser-refresh material-icons" style="background: transparent; color: #757575; box-shadow: none; padding: 4px;" title="Обновить">refresh</button>
+                            <input type="text" class="browser-url" placeholder="Введите веб-адрес...">
+                            <button class="browser-go" style="background:#F44336;">Перейти</button>
+                            <button class="browser-dl-file material-icons" style="background: #009688; color: white; margin-left: 4px; padding: 6px; font-size: 20px; border-radius: 2px;" title="Скачать этот URL в Проводник ОС">file_download</button>
+                        </div>
+                        <div class="browser-frames-container"></div>
+                    </div>
+                `,
+                init: (win) => {
+                    const tabsContainer = win.querySelector('.browser-tabs');
+                    const framesContainer = win.querySelector('.browser-frames-container');
+                    const newTabBtn = win.querySelector('.browser-new-tab');
+                    const urlInput = win.querySelector('.browser-url');
+                    const goBtn = win.querySelector('.browser-go');
+                    const refreshBtn = win.querySelector('.browser-refresh');
+                    const dlBtn = win.querySelector('.browser-dl-file');
+
+                    let tabs = []; let activeTabId = null; let tabCounter = 0;
+
+                    const getHostName = (url) => { try { return new URL(url).hostname; } catch(e) { return url; } };
+
+                    const createTab = (url = 'https://ru.wikipedia.org/wiki/Заглавная_страница') => {
+                        const id = 'tab_' + (++tabCounter) + '_' + Date.now();
+                        const tabEl = document.createElement('div');
+                        tabEl.className = 'browser-tab';
+                        tabEl.innerHTML = `<span class="tab-title">Загрузка...</span><span class="material-icons close-tab">close</span>`;
+                        
+                        const useProxy = !url.includes('wikipedia.org');
+                        const iframeUrl = useProxy ? 'https://corsproxy.io/?' + encodeURIComponent(url) : url;
+
+                        const iframeEl = document.createElement('iframe');
+                        iframeEl.className = 'browser-iframe'; 
+                        iframeEl.src = iframeUrl;
+
+                        tabsContainer.appendChild(tabEl); framesContainer.appendChild(iframeEl);
+                        tabs.push({ id, url, tabEl, iframeEl });
+
+                        tabEl.addEventListener('mousedown', (e) => {
+                            if (e.target.classList.contains('close-tab') || e.button === 1) closeTab(id);
+                            else switchTab(id);
+                        });
+
+                        iframeEl.addEventListener('load', () => {
+                            const t = tabs.find(t => t.id === id);
+                            if(t) {
+                                tabEl.querySelector('.tab-title').textContent = getHostName(t.url);
+                                tabEl.title = t.url;
+                                if (activeTabId === id) urlInput.value = t.url;
+                            }
+                        });
+                        switchTab(id);
+                    };
+
+                    const switchTab = (id) => {
+                        activeTabId = id;
+                        tabs.forEach(tab => {
+                            if (tab.id === id) {
+                                tab.tabEl.classList.add('active'); tab.iframeEl.classList.add('active');
+                                urlInput.value = tab.url; 
+                            } else {
+                                tab.tabEl.classList.remove('active'); tab.iframeEl.classList.remove('active');
+                            }
+                        });
+                    };
+
+                    const closeTab = (id) => {
+                        const tabIndex = tabs.findIndex(t => t.id === id);
+                        if (tabIndex > -1) {
+                            tabs[tabIndex].tabEl.remove(); tabs[tabIndex].iframeEl.remove();
+                            tabs.splice(tabIndex, 1);
+                            if (tabs.length === 0) createTab(); 
+                            else if (activeTabId === id) switchTab(tabs[Math.max(0, tabIndex - 1)].id);
+                        }
+                    };
+
+                    const navigate = () => {
+                        let url = urlInput.value.trim();
+                        if (!url) return;
+                        if (!url.startsWith('http://') && !url.startsWith('https://')) url = 'https://' + url;
+                        
+                        const activeTab = tabs.find(t => t.id === activeTabId);
+                        if (activeTab) { 
+                            const useProxy = !url.includes('wikipedia.org');
+                            const proxyUrl = useProxy ? 'https://corsproxy.io/?' + encodeURIComponent(url) : url;
+                            
+                            activeTab.iframeEl.src = proxyUrl; 
+                            activeTab.url = url; 
+                            activeTab.tabEl.querySelector('.tab-title').textContent = 'Загрузка...'; 
+                        }
+                    };
+
+                    goBtn.addEventListener('click', navigate);
+                    urlInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') navigate(); });
+                    refreshBtn.addEventListener('click', () => { const t = tabs.find(t => t.id === activeTabId); if (t) t.iframeEl.src = t.iframeEl.src; });
+                    newTabBtn.addEventListener('click', () => createTab('https://ya.ru/'));
+
+                    dlBtn.addEventListener('click', () => {
+                        let url = urlInput.value.trim();
+                        if (!url || url.includes('wikipedia.org/wiki')) {
+                            alert("Пожалуйста, укажите прямую ссылку на конкретный скачиваемый файл в адресной строке.");
+                            return;
+                        }
+                        
+                        dlBtn.innerText = 'hourglass_empty';
+                        dlBtn.disabled = true;
+
+                        fetch(url)
+                            .then(res => {
+                                if (!res.ok) throw new Error("Ошибка ответа сервера");
+                                return res.blob().then(blob => ({ blob, type: res.headers.get('content-type') }));
+                            })
+                            .then(({ blob, type }) => {
+                                let filename = url.substring(url.lastIndexOf('/') + 1) || 'downloaded_file';
+                                if (filename.includes('?')) filename = filename.split('?')[0];
+                                
+                                VFS.addFile(currentUser, filename, type, blob).then(() => {
+                                    alert(`Файл "${filename}" успешно загружен в кэш Проводника веб-ОС!`);
+                                });
+                            })
+                            .catch(err => {
+                                console.warn("Запрос заблокирован CORS политикой реального сайта. Эмулируем скачивание тестового файла...");
+                                let mockData = `Содержимое веб-документа с адреса: ${url}\nСкачано: ${new Date().toLocaleString()}\nСистема безопасности: Файл изолирован от хост-компьютера.`;
+                                let mockBlob = new Blob([mockData], { type: 'text/plain' });
+                                let filename = url.substring(url.lastIndexOf('/') + 1) || 'web_document.txt';
+                                if (!filename.includes('.')) filename += '.txt';
+                                
+                                VFS.addFile(currentUser, filename, 'text/plain', mockBlob).then(() => {
+                                    alert(`Из-за CORS ограничений сети интернет сгенерирован изолированный слепок файла "${filename}" и помещен в Проводник!`);
+                                });
+                            })
+                            .finally(() => {
+                                dlBtn.innerText = 'file_download';
+                                dlBtn.disabled = false;
+                            });
+                    });
+
+                    createTab();
+                }
+            },
+            'terminal': {
+                icon: 'terminal', title: 'Терминал', width: 550, height: 350, color: '#37474F',
+                content: `
+                    <div class="app-terminal">
+                        <div class="app-terminal-output" id="term-out">InbleltOS [Version 1.0]<br><br></div>
+                        <div class="app-terminal-input-row">
+                            <span id="term-prompt"></span>
+                            <input type="text" id="term-in" class="app-terminal-input" autocomplete="off">
+                        </div>
+                    </div>
+                `,
+                init: (win) => {
+                    const input = win.querySelector('#term-in');
+                    const output = win.querySelector('#term-out');
+                    win.querySelector('#term-prompt').innerText = `${currentUser}@inblelt:~$`;
+                    input.focus();
+                    input.addEventListener('keypress', (e) => {
+                        if(e.key === 'Enter') {
+                            const val = input.value.trim();
+                            output.innerHTML += `<div>${currentUser}@inblelt:~$ ${val}</div>`;
+                            input.value = '';
+                            if(val === 'help') output.innerHTML += `<div>Доступно: help, date, clear, calc, store, explorer, exit</div>`;
+                            else if(val === 'date') output.innerHTML += `<div>${new Date().toString()}</div>`;
+                            else if(val === 'clear') output.innerHTML = 'InbleltOS [Version 1.0]<br><br>';
+                            else if(val === 'calc') launchApp('calculator');
+                            else if(val === 'store') launchApp('store');
+                            else if(val === 'explorer') launchApp('explorer');
+                            else if(val === 'exit') logoutSystem();
+                            else if(val !== '') output.innerHTML += `<div>Команда не найдена: ${val}</div>`;
+                            output.scrollTop = output.scrollHeight;
+                        }
+                    });
+                }
+            },
+            'calculator': {
+                icon: 'calculate', title: 'Калькулятор', width: 320, height: 460, color: '#673AB7',
+                content: `
+                    <div class="app-calc">
+                        <div class="app-calc-display" id="calc-display">0</div>
+                        <div class="app-calc-grid">
+                            <button class="app-calc-btn" onclick="calcInput('7')">7</button>
+                            <button class="app-calc-btn" onclick="calcInput('8')">8</button>
+                            <button class="app-calc-btn" onclick="calcInput('9')">9</button>
+                            <button class="app-calc-btn op" onclick="calcOp('/')">÷</button>
+                            
+                            <button class="app-calc-btn" onclick="calcInput('4')">4</button>
+                            <button class="app-calc-btn" onclick="calcInput('5')">5</button>
+                            <button class="app-calc-btn" onclick="calcInput('6')">6</button>
+                            <button class="app-calc-btn op" onclick="calcOp('*')">×</button>
+                            
+                            <button class="app-calc-btn" onclick="calcInput('1')">1</button>
+                            <button class="app-calc-btn" onclick="calcInput('2')">2</button>
+                            <button class="app-calc-btn" onclick="calcInput('3')">3</button>
+                            <button class="app-calc-btn op" onclick="calcOp('-')">-</button>
+                            
+                            <button class="app-calc-btn" onclick="calcInput('C')">C</button>
+                            <button class="app-calc-btn" onclick="calcInput('0')">0</button>
+                            <button class="app-calc-btn op" onclick="calcOp('+')">+</button>
+                            <button class="app-calc-btn equal" onclick="calcEval()" style="background:#673AB7;">=</button>
+                        </div>
+                    </div>
+                `,
+                init: (win) => {
+                    if(!window.calcInitialized) {
+                        window.calcVal = '0';
+                        window.calcInput = (v) => {
+                            const d = document.getElementById('calc-display');
+                            if(!d) return;
+                            if(v === 'C') window.calcVal = '0';
+                            else if(window.calcVal === '0' || window.calcVal === 'Error') window.calcVal = v;
+                            else window.calcVal += v;
+                            d.innerText = window.calcVal;
+                        };
+                        window.calcOp = (op) => {
+                            const d = document.getElementById('calc-display');
+                            if(window.calcVal !== 'Error') window.calcVal += op;
+                            d.innerText = window.calcVal;
+                        };
+                        window.calcEval = () => {
+                            const d = document.getElementById('calc-display');
+                            try { window.calcVal = String(eval(window.calcVal)); } catch(e) { window.calcVal = 'Error'; }
+                            d.innerText = window.calcVal;
+                        };
+                        window.calcInitialized = true;
+                    }
                 }
             },
             'settings': {
@@ -693,27 +1181,50 @@
                             <div id="settings-theme" class="settings-section active">
                                 <h3>Оформление стола</h3>
                                 <p style="color: #757575; font-size: 14px;">Цвет и обои применяются для профиля <b><span class="set-curr-user"></span></b>.</p>
-                                <div class="color-picker-row"><label style="flex-grow: 1; font-size: 16px;">Основной цвет</label><input type="color" id="bg-color-picker"></div>
-                                <h4 style="margin-top: 24px; margin-bottom: 8px; color: #212121; font-weight: 500; font-size: 16px;">Обои</h4>
-                                <div id="wallpaper-grid" style="display: flex; gap: 12px; flex-wrap: wrap;">
-                                    <div class="wallpaper-thumb" data-url="" style="width: 80px; height: 50px; background: #ECEFF1; border: 2px solid #CFD8DC; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #757575;" title="Без обоев"><span class="material-icons">block</span></div>
-                                    <div class="wallpaper-thumb" data-url="https://images.unsplash.com/photo-1506744626753-dba7d41543f4?auto=format&fit=crop&w=1920&q=80" style="width: 80px; height: 50px; background: url('https://images.unsplash.com/photo-1506744626753-dba7d41543f4?auto=format&fit=crop&w=200&q=80') center/cover; border: 2px solid transparent; border-radius: 4px; cursor: pointer;"></div>
-                                    <div class="wallpaper-thumb" data-url="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=1920&q=80" style="width: 80px; height: 50px; background: url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=200&q=80') center/cover; border: 2px solid transparent; border-radius: 4px; cursor: pointer;"></div>
-                                    <div class="wallpaper-thumb" data-url="https://images.unsplash.com/photo-1538370965046-79c0d6907d47?auto=format&fit=crop&w=1920&q=80" style="width: 80px; height: 50px; background: url('https://images.unsplash.com/photo-1538370965046-79c0d6907d47?auto=format&fit=crop&w=200&q=80') center/cover; border: 2px solid transparent; border-radius: 4px; cursor: pointer;"></div>
+                                
+                                <div class="color-picker-row">
+                                    <label style="flex-grow: 1; font-size: 16px;">Основной цвет фона</label>
+                                    <input type="color" id="bg-color-picker">
                                 </div>
-                                <div style="margin-top: 24px;"><button id="reset-bg-btn" style="background: transparent; color: #607D8B; box-shadow: none;">СБРОСИТЬ ВСЕ</button></div>
+                                
+                                <h4 style="margin-top: 24px; margin-bottom: 8px; color: #212121; font-weight: 500; font-size: 16px;">Обои рабочего стола</h4>
+                                <div id="wallpaper-grid" style="display: flex; gap: 12px; flex-wrap: wrap;">
+                                    <!-- Опция: Без обоев -->
+                                    <div class="wallpaper-thumb" data-url="" style="width: 80px; height: 50px; background: #ECEFF1; border: 2px solid #CFD8DC; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #757575;" title="Без обоев">
+                                        <span class="material-icons" style="font-size: 20px;">block</span>
+                                    </div>
+                                    
+                                    <!-- Маттерхорн ДЕНЬ -->
+                                    <div class="wallpaper-thumb" data-url="https://images.unsplash.com/photo-1534067783921-91c384be527a?q=80&w=1920&auto=format&fit=crop" style="width: 80px; height: 50px; background: url('https://images.unsplash.com/photo-1534067783921-91c384be527a?q=80&w=200&auto=format&fit=crop') center/cover; border: 2px solid transparent; border-radius: 4px; cursor: pointer;" title="Маттерхорн: День"></div>
+                                    
+                                    <!-- Маттерхорн ВЕЧЕР -->
+                                    <div class="wallpaper-thumb" data-url="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=1920&auto=format&fit=crop" style="width: 80px; height: 50px; background: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=200&auto=format&fit=crop') center/cover; border: 2px solid transparent; border-radius: 4px; cursor: pointer;" title="Маттерхорн: Вечер"></div>
+                                    
+                                    <!-- Маттерхорн НОЧЬ -->
+                                    <div class="wallpaper-thumb" data-url="https://images.unsplash.com/photo-1549880181-56a44cf4a9a1?q=80&w=1920&auto=format&fit=crop" style="width: 80px; height: 50px; background: url('https://images.unsplash.com/photo-1549880181-56a44cf4a9a1?q=80&w=200&auto=format&fit=crop') center/cover; border: 2px solid transparent; border-radius: 4px; cursor: pointer;" title="Маттерхорн: Ночь"></div>
+                                </div>
+
+                                <div style="margin-top: 24px;">
+                                    <button id="reset-bg-btn" style="background: transparent; color: #607D8B; box-shadow: none;">СБРОСИТЬ ВСЕ</button>
+                                </div>
                             </div>
+                            
                             <div id="settings-users" class="settings-section">
                                 <h3>Управление пользователями</h3>
+                                <p style="color: #757575; margin-bottom: 16px;">Текущий профиль: <b><span class="set-curr-user"></span></b></p>
+                                
                                 <ul class="task-list" id="settings-users-list" style="margin-bottom: 16px; border: 1px solid #E0E0E0; max-height: 160px;"></ul>
+                                
                                 <div class="task-input-row" style="margin-bottom:0; flex-direction: column; gap: 8px; align-items: stretch;">
                                     <input type="text" id="new-user-input" placeholder="Имя нового пользователя">
                                     <input type="password" id="new-user-pass" placeholder="Пароль (пусто — без пароля)">
                                     <button id="add-user-btn" style="background: #009688; align-self: flex-end; margin-top: 4px;">Добавить</button>
                                 </div>
                             </div>
+
                             <div id="settings-apps" class="settings-section">
                                 <h3>Установленные программы</h3>
+                                <p style="color: #757575; margin-bottom: 12px;">Здесь отображаются все сторонние расширения, загруженные из официального Магазина.</p>
                                 <ul class="task-list" id="settings-apps-list" style="border: 1px solid #E0E0E0; max-height: 260px; overflow-y:auto;"></ul>
                             </div>
                         </div>
@@ -722,6 +1233,7 @@
                 init: (win) => {
                     const tabBtns = win.querySelectorAll('.settings-tab-btn');
                     const sections = win.querySelectorAll('.settings-section');
+                    
                     tabBtns.forEach(btn => {
                         btn.addEventListener('click', () => {
                             tabBtns.forEach(b => b.classList.remove('active'));
@@ -733,67 +1245,193 @@
 
                     win.querySelectorAll('.set-curr-user').forEach(el => el.innerText = currentUser);
 
+                    // Управление фоном (Цвет)
                     const colorPicker = win.querySelector('#bg-color-picker');
+                    const resetBtn = win.querySelector('#reset-bg-btn');
                     colorPicker.value = loadUserData('bg_color') || '#ECEFF1';
+
                     colorPicker.addEventListener('input', (e) => {
-                        document.body.style.backgroundColor = e.target.value;
-                        saveUserData('bg_color', e.target.value);
+                        const color = e.target.value;
+                        document.body.style.backgroundColor = color;
+                        saveUserData('bg_color', color);
                     });
 
+                    // Управление обоями
                     const wallpaperThumbs = win.querySelectorAll('.wallpaper-thumb');
                     const applyWallpaper = (url) => {
-                        document.body.style.backgroundImage = url ? `url('${url}')` : '';
+                        if (url) {
+                            document.body.style.backgroundImage = `url('${url}')`;
+                        } else {
+                            document.body.style.backgroundImage = '';
+                        }
                         saveUserData('bg_image', url);
+                        
                         wallpaperThumbs.forEach(t => t.style.borderColor = (t.dataset.url === url) ? '#009688' : 'transparent');
                         if(!url) wallpaperThumbs[0].style.borderColor = '#CFD8DC';
                     };
-                    applyWallpaper(loadUserData('bg_image') || '');
-                    wallpaperThumbs.forEach(thumb => thumb.addEventListener('click', () => applyWallpaper(thumb.dataset.url)));
 
-                    win.querySelector('#reset-bg-btn').addEventListener('click', () => {
-                        localStorage.removeItem(getUserKey('bg_color')); localStorage.removeItem(getUserKey('bg_image'));
-                        document.body.style.backgroundColor = '#ECEFF1'; colorPicker.value = '#ECEFF1'; applyWallpaper('');
+                    const savedImg = loadUserData('bg_image') || '';
+                    applyWallpaper(savedImg);
+
+                    wallpaperThumbs.forEach(thumb => {
+                        thumb.addEventListener('click', () => {
+                            applyWallpaper(thumb.dataset.url);
+                        });
                     });
 
+                    // Сброс настроек
+                    resetBtn.addEventListener('click', () => {
+                        localStorage.removeItem(getUserKey('bg_color'));
+                        localStorage.removeItem(getUserKey('bg_image'));
+                        document.body.style.backgroundColor = '#ECEFF1';
+                        colorPicker.value = '#ECEFF1';
+                        applyWallpaper('');
+                    });
+
+                    // Управление пользователями
                     const usersListContainer = win.querySelector('#settings-users-list');
+                    const newUserInput = win.querySelector('#new-user-input');
+                    const newUserPass = win.querySelector('#new-user-pass');
+                    const addUserBtn = win.querySelector('#add-user-btn');
+
                     const renderSettingsUsers = () => {
                         usersListContainer.innerHTML = '';
                         usersList.forEach(u => {
                             const li = document.createElement('li');
                             li.className = 'task-item';
+                            const isCurrent = u.name === currentUser;
                             li.innerHTML = `
                                 <div style="display:flex; align-items:center; gap:12px;">
-                                    <span class="material-icons">${u.avatar || 'account_circle'}</span>
-                                    <span>${u.name}</span>
+                                    <span class="material-icons" style="color: ${isCurrent ? '#009688' : '#9E9E9E'}">account_circle</span>
+                                    <span style="font-size:16px; font-weight: ${isCurrent ? '500' : '400'}">${u.name}</span>
+                                    ${u.password ? '<span class="material-icons" style="font-size: 16px; color: #757575;" title="Защищен паролем">lock</span>' : ''}
                                 </div>
-                                ${u.name !== currentUser ? `<button class="delete-user-btn" data-user="${u.name}" style="background:transparent; color:#F44336; box-shadow:none;">УДАЛИТЬ</button>` : ''}
+                                ${!isCurrent ? `<button class="delete-user-btn" data-user="${u.name}" style="background:transparent; color:#F44336; box-shadow:none;">УДАЛИТЬ</button>` : ''}
                             `;
                             usersListContainer.appendChild(li);
                         });
                     };
+
                     usersListContainer.addEventListener('click', (e) => {
                         if(e.target.classList.contains('delete-user-btn')) {
-                            usersList = usersList.filter(user => user.name !== e.target.dataset.user);
+                            const uName = e.target.dataset.user;
+                            usersList = usersList.filter(user => user.name !== uName);
                             localStorage.setItem('os_users_list', JSON.stringify(usersList));
-                            renderSettingsUsers(); initLoginScreen(); 
+                            renderSettingsUsers();
+                            initLoginScreen(); 
                         }
                     });
 
                     const addNewUser = () => {
-                        const name = win.querySelector('#new-user-input').value.trim();
-                        const password = win.querySelector('#new-user-pass').value;
+                        const name = newUserInput.value.trim();
+                        const password = newUserPass.value;
                         if (name && !usersList.some(user => user.name === name)) {
-                            usersList.push({ name, password, avatar: 'account_circle' });
+                            usersList.push({ name, password });
                             localStorage.setItem('os_users_list', JSON.stringify(usersList));
-                            win.querySelector('#new-user-input').value = ''; win.querySelector('#new-user-pass').value = '';
-                            renderSettingsUsers(); initLoginScreen();
+                            newUserInput.value = '';
+                            newUserPass.value = '';
+                            renderSettingsUsers();
+                            initLoginScreen();
                         }
                     };
-                    win.querySelector('#add-user-btn').addEventListener('click', addNewUser);
+
+                    addUserBtn.addEventListener('click', addNewUser);
+                    newUserInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') addNewUser(); });
+                    newUserPass.addEventListener('keypress', (e) => { if (e.key === 'Enter') addNewUser(); });
+
                     renderSettingsUsers();
+
+                    // Управление приложениями
+                    const appsListContainer = win.querySelector('#settings-apps-list');
+
+                    const renderInstalledAppsList = () => {
+                        appsListContainer.innerHTML = '';
+                        const appKeys = Object.keys(installedApps);
+                        if (appKeys.length === 0) {
+                            appsListContainer.innerHTML = '<li class="task-item" style="color: #757575;">Нет установленных приложений</li>';
+                            return;
+                        }
+                        appKeys.forEach(id => {
+                            const app = installedApps[id];
+                            const li = document.createElement('li');
+                            li.className = 'task-item';
+                            li.innerHTML = `
+                                <div style="display:flex; align-items:center; gap:12px;">
+                                    <span class="material-icons" style="color: ${app.color || '#9C27B0'}">${app.icon || 'extension'}</span>
+                                    <span style="font-size:16px;">${app.title} [${id}]</span>
+                                </div>
+                                <button class="delete-app-btn" data-appid="${id}" style="background:transparent; color:#F44336; box-shadow:none;">УДАЛИТЬ</button>
+                            `;
+                            appsListContainer.appendChild(li);
+                        });
+                    };
+
+                    appsListContainer.addEventListener('click', (e) => {
+                        if(e.target.classList.contains('delete-app-btn')) {
+                            const id = e.target.dataset.appid;
+                            delete installedApps[id];
+                            localStorage.setItem('os_installed_apps', JSON.stringify(installedApps));
+                            delete AppRegistry[id];
+                            renderInstalledAppsList();
+                            renderCustomDesktopIcons();
+                        }
+                    });
+
+                    renderInstalledAppsList();
                 }
             }
         };
+
+        function registerSingleCustomApp(appId, appData) {
+            AppRegistry[appId] = {
+                icon: appData.icon || 'extension',
+                title: appData.title || appId,
+                width: appData.width || 500,
+                height: appData.height || 400,
+                color: appData.color || '#9C27B0',
+                content: `<iframe id="app-frame-${appId}" style="width:100%; height:100%; border:none; background:#ffffff;"></iframe>`,
+                init: (win) => {
+                    const frame = win.querySelector(`#app-frame-${appId}`);
+                    if (frame) {
+                        const blob = new Blob([appData.htmlContent], { type: 'text/html' });
+                        frame.src = URL.createObjectURL(blob);
+                        
+                        frame.onload = () => {
+                            try {
+                                if (frame.contentWindow) {
+                                    frame.contentWindow.alert = window.alert;
+                                }
+                            } catch(e) { 
+                                console.warn("Не удалось привязать alert фрейма:", e); 
+                            }
+                        };
+                    }
+                }
+            };
+        }
+
+        function renderCustomDesktopIcons() {
+            document.querySelectorAll('.desktop-icon.custom-app').forEach(el => el.remove());
+            const desktop = document.getElementById('desktop');
+            Object.keys(installedApps).forEach(appId => {
+                const app = installedApps[appId];
+                const iconEl = document.createElement('div');
+                iconEl.className = 'desktop-icon custom-app';
+                iconEl.setAttribute('onclick', `launchApp('${appId}')`);
+                iconEl.innerHTML = `
+                    <span class="material-icons" style="color: ${app.color || '#9C27B0'};">${app.icon || 'extension'}</span>
+                    <span>${app.title}</span>
+                `;
+                desktop.appendChild(iconEl);
+            });
+        }
+
+        function initInstalledApps() {
+            Object.keys(installedApps).forEach(appId => {
+                registerSingleCustomApp(appId, installedApps[appId]);
+            });
+            renderCustomDesktopIcons();
+        }
 
         function launchApp(appId) {
             const app = AppRegistry[appId];
@@ -806,13 +1444,17 @@
             
             const openedWindows = document.querySelectorAll('.window').length;
             const offset = 40 + (openedWindows * 30);
-            windowEl.style.top = `${offset}px`; windowEl.style.left = `${offset}px`;
-            windowEl.style.width = `${app.width}px`; windowEl.style.height = `${app.height}px`;
+            windowEl.style.top = `${offset}px`;
+            windowEl.style.left = `${offset}px`;
+            windowEl.style.width = `${app.width}px`;
+            windowEl.style.height = `${app.height}px`;
 
             windowEl.innerHTML = `
                 <div class="title-bar" style="background-color: ${app.color};">
                     <div class="title-info"><span class="material-icons">${app.icon}</span> ${app.title}</div>
                     <div class="window-controls">
+                        <span class="material-icons minimize-btn" title="Свернуть">remove</span>
+                        <span class="material-icons maximize-btn" title="Развернуть">crop_square</span>
                         <span class="material-icons close-btn" title="Закрыть">close</span>
                     </div>
                 </div>
@@ -824,16 +1466,62 @@
             tbItem.innerHTML = `<span class="material-icons" style="color: ${app.color};">${app.icon}</span> ${app.title}`;
             document.getElementById('taskbar-apps').appendChild(tbItem);
 
-            const bringToFront = () => { highestZIndex++; windowEl.style.zIndex = highestZIndex; };
-            bringToFront(); windowEl.addEventListener('mousedown', bringToFront);
+            const bringToFront = () => {
+                highestZIndex++;
+                windowEl.style.zIndex = highestZIndex;
+                document.querySelectorAll('.taskbar-item').forEach(el => el.classList.remove('active'));
+                tbItem.classList.add('active');
+            };
 
-            windowEl.querySelector('.close-btn').onclick = () => { windowEl.remove(); tbItem.remove(); };
+            bringToFront();
+            windowEl.addEventListener('mousedown', bringToFront);
 
+            windowEl.querySelector('.minimize-btn').onclick = (e) => {
+                e.stopPropagation();
+                windowEl.style.opacity = '0';
+                setTimeout(() => { windowEl.style.display = 'none'; windowEl.style.opacity = '1'; }, 200);
+                tbItem.classList.remove('active');
+            };
+
+            let isMaximized = false; let preMaxTransform = '';
+            const maxBtn = windowEl.querySelector('.maximize-btn');
+            maxBtn.onclick = (e) => {
+                e.stopPropagation();
+                isMaximized = !isMaximized;
+                if (isMaximized) {
+                    preMaxTransform = windowEl.style.transform;
+                    windowEl.style.transform = 'none'; windowEl.classList.add('maximized'); maxBtn.innerText = 'filter_none';
+                } else {
+                    windowEl.classList.remove('maximized'); windowEl.style.transform = preMaxTransform; maxBtn.innerText = 'crop_square';
+                }
+                bringToFront();
+            };
+
+            windowEl.querySelector('.close-btn').onclick = (e) => {
+                e.stopPropagation(); windowEl.style.opacity = '0'; windowEl.style.transform = 'scale(0.9)';
+                windowEl.dispatchEvent(new CustomEvent('close_window_event'));
+                setTimeout(() => { windowEl.remove(); tbItem.remove(); }, 200);
+            };
+
+            tbItem.onclick = () => {
+                if (windowEl.style.display === 'none') { windowEl.style.display = 'flex'; bringToFront(); } 
+                else {
+                    if (windowEl.style.zIndex == highestZIndex) {
+                        windowEl.style.opacity = '0'; setTimeout(() => { windowEl.style.display = 'none'; windowEl.style.opacity = '1'; }, 200);
+                        tbItem.classList.remove('active');
+                    } else bringToFront();
+                }
+            };
+
+            const titleBar = windowEl.querySelector('.title-bar');
             let isDragging = false; let currentX, currentY, initialX, initialY; let xOffset = 0, yOffset = 0;
-            windowEl.querySelector('.title-bar').addEventListener('mousedown', (e) => {
+
+            titleBar.addEventListener('mousedown', (e) => {
+                if (windowEl.classList.contains('maximized')) return;
                 initialX = e.clientX - xOffset; initialY = e.clientY - yOffset;
                 if (!e.target.classList.contains('material-icons')) { isDragging = true; document.addEventListener('mousemove', drag); document.addEventListener('mouseup', dragEnd); }
             });
+
             function drag(e) { if (isDragging) { e.preventDefault(); currentX = e.clientX - initialX; currentY = e.clientY - initialY; xOffset = currentX; yOffset = currentY; windowEl.style.transform = `translate(${currentX}px, ${currentY}px)`; } }
             function dragEnd() { isDragging = false; document.removeEventListener('mousemove', drag); document.removeEventListener('mouseup', dragEnd); }
 
@@ -844,23 +1532,17 @@
         // --- Главный процесс инициализации (Boot) ---
         function bootSystem() {
             const isInstalled = localStorage.getItem('os_installed');
-            const bootScreen = document.getElementById('boot-screen');
-
             // Проверка на отсутствие флага установки или отсутствие юзеров вообще
             if (!isInstalled || usersList.length === 0) {
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('setup-screen').style.display = 'flex';
             } else {
-                // Обычная загрузка ОС при уже установленной системе
-                bootScreen.style.display = 'flex';
-                setTimeout(() => {
-                    bootScreen.style.display = 'none';
-                    initLoginScreen();
-                }, 2000);
+                initLoginScreen();
             }
         }
 
         VFS.init().then(() => {
+            initInstalledApps();
             bootSystem();
         });
     </script>
