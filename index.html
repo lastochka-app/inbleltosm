@@ -3,290 +3,219 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>InbleltOS 10.01 Matterhorn</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <title>InbleltOS Professional (XP Style)</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
-        /* Базовые настройки MD1 */
+        /* --- Полный редизайн Веб-ОС под стиль Windows XP (Luna) и 2000-е --- */
+        
         body {
             margin: 0;
             overflow: hidden;
-            font-family: 'Roboto', sans-serif;
-            background-color: #ECEFF1; 
+            font-family: Tahoma, Arial, Helvetica, sans-serif;
+            background-color: #3b6ea5; 
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
-            color: #212121;
+            color: #000000;
             user-select: none;
             transition: background 0.3s;
-            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="28" viewBox="0 0 24 28"><path d="M2 2 L14 14 H8.5 L12 21.5 L9.5 22.5 L6 15 L2 19 V2 Z" fill="%23212121" stroke="%23ffffff" stroke-width="1.5" stroke-linejoin="round"/></svg>') 2 2, default;
+            cursor: default;
         }
+
+        /* Системные скроллбары начала 2000-х */
+        ::-webkit-scrollbar { width: 16px; height: 16px; }
+        ::-webkit-scrollbar-track { background: #efebde; box-shadow: inset 1px 1px 0 #fff; }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(to right, #fafafa 0%, #dcd8c4 100%); border: 1px solid #999; box-shadow: inset 1px 1px 0 #fff; }
 
         /* --- Экран Первоначальной Настройки (OOBE) --- */
         #setup-screen {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background-color: #263238; z-index: 100000;
-            display: none; align-items: center; justify-content: center; flex-direction: column;
-            color: #FFFFFF;
+            background: radial-gradient(circle, #5b7edc 0%, #003399 100%); 
+            z-index: 100000; display: none; align-items: center; justify-content: center; flex-direction: column; color: #FFFFFF;
         }
         .setup-box {
-            background: #FFFFFF; color: #212121; padding: 40px; border-radius: 4px;
-            box-shadow: 0 16px 24px 2px rgba(0,0,0,0.14), 0 6px 30px 5px rgba(0,0,0,0.12), 0 8px 10px -5px rgba(0,0,0,0.2);
-            width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 24px;
-            animation: windowAppear 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            background: #ece9d8; color: #000000; padding: 30px; border: 2px solid #0046d5; border-radius: 6px;
+            box-shadow: 4px 4px 20px rgba(0,0,0,0.5); width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 20px;
         }
-        .setup-title { font-size: 28px; font-weight: 500; margin: 0; color: #009688; display: flex; align-items: center; gap: 12px; }
-        .setup-desc { font-size: 15px; color: #757575; line-height: 1.5; margin: 0; }
+        .setup-title { font-size: 24px; font-weight: bold; margin: 0; color: #0046d5; display: flex; align-items: center; gap: 12px; }
+        .setup-desc { font-size: 13px; color: #000000; line-height: 1.4; margin: 0; }
 
         /* --- Экран Входа в Систему --- */
         #login-screen {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100vw; height: 100vh;
-            background-color: #263238;
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            z-index: 99999;
-            display: none; 
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            animation: fadeIn 0.3s ease;
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: #5b7edc; background-size: cover; background-position: center; background-repeat: no-repeat;
+            z-index: 99999; display: none; align-items: center; justify-content: center; flex-direction: row; padding: 50px; box-sizing: border-box;
         }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        #login-clock {
-            font-size: 80px;
-            font-weight: 300;
-            color: #FFFFFF;
-            margin-bottom: 4px;
-            text-shadow: 0 4px 12px rgba(0,0,0,0.4);
-            letter-spacing: -1px;
+        
+        #login-screen::before {
+            content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 48%;
+            background: #002080; border-right: 2px solid #ffffff; box-shadow: inset -15px 0 30px rgba(0,0,0,0.3); z-index: 1;
         }
 
-        #login-date {
-            font-size: 20px;
-            font-weight: 400;
-            color: rgba(255, 255, 255, 0.85);
-            margin-bottom: 40px;
-            text-shadow: 0 2px 8px rgba(0,0,0,0.4);
-            text-transform: capitalize;
-        }
-
-        .login-title {
-            font-size: 22px;
-            font-weight: 400;
-            color: #FFFFFF;
-            margin-bottom: 24px;
-            text-shadow: 0 2px 6px rgba(0,0,0,0.4);
-        }
+        #login-clock { position: absolute; top: 25px; right: 40px; font-size: 36px; font-weight: bold; color: #FFFFFF; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); z-index: 2; }
+        #login-date { position: absolute; top: 70px; right: 40px; font-size: 14px; color: #dfdfdf; z-index: 2; }
+        .login-title { position: absolute; left: 8%; top: 50%; transform: translateY(-50%); font-size: 38px; font-weight: bold; color: #FFFFFF; max-width: 35%; text-shadow: 2px 2px 5px rgba(0,0,0,0.6); z-index: 2; }
 
         #login-users-list {
-            display: flex;
-            gap: 24px;
-            justify-content: center;
-            flex-wrap: wrap;
-            max-width: 800px;
+            margin-left: auto; width: 45%; display: flex; flex-direction: column; gap: 14px; justify-content: center; align-items: flex-start; z-index: 2;
         }
 
         .login-user-card {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            padding: 24px 32px;
-            border-radius: 8px;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            cursor: pointer !important;
-            transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
-            min-width: 140px;
-            position: relative;
+            background: transparent; padding: 8px 16px; border-radius: 4px; display: flex; flex-direction: row; align-items: center; cursor: pointer !important; width: 260px; border: 1px solid transparent; transition: background 0.1s;
         }
-        .login-user-card:hover {
-            transform: translateY(-4px);
-            background: #FFFFFF;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-        }
-        .login-user-card .material-icons.avatar {
-            font-size: 72px;
-            color: #009688;
-            margin-bottom: 16px;
-        }
-        .login-user-card span {
-            font-size: 18px;
-            font-weight: 500;
-            color: #212121;
-        }
+        .login-user-card:hover { background: rgba(255, 255, 255, 0.25); border: 1px solid #ffffff; transform: none; box-shadow: none; }
+        .login-user-card .material-icons.avatar { font-size: 42px; color: #ffffff; margin-bottom: 0; margin-right: 14px; background: #ff9900; border: 2px solid #ffffff; border-radius: 4px; padding: 2px; }
+        .login-user-card span { font-size: 18px; font-weight: bold; color: #FFFFFF; text-shadow: 1px 1px 2px rgba(0,0,0,0.6); }
 
         #password-container {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            padding: 32px;
-            border-radius: 8px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            min-width: 280px;
-            gap: 16px;
-            animation: fadeIn 0.2s ease;
+            background: #ece9d8; padding: 24px; border-radius: 4px; border: 2px solid #0046d5; box-shadow: 4px 4px 15px rgba(0,0,0,0.4);
+            display: none; flex-direction: column; align-items: center; min-width: 260px; gap: 12px; z-index: 3; color: #000;
         }
 
         /* --- Рабочий Стол и UI --- */
         #desktop {
-            width: 100vw; height: calc(100vh - 48px);
-            position: relative; padding: 16px; box-sizing: border-box;
-            display: none; 
-            flex-direction: column; align-content: flex-start; flex-wrap: wrap; gap: 8px;
+            width: 100vw; height: calc(100vh - 30px); position: relative; padding: 10px; box-sizing: border-box; display: none; flex-direction: column; align-content: flex-start; flex-wrap: wrap; gap: 4px;
         }
 
-        .desktop-icon, .start-btn, .taskbar-item, .start-menu-item, button, .window-controls .material-icons, #user-display, .context-menu-item {
-            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="28" viewBox="0 0 24 28"><path d="M2 2 L14 14 H8.5 L12 21.5 L9.5 22.5 L6 15 L2 19 V2 Z" fill="%23FF4081" stroke="%23ffffff" stroke-width="1.5" stroke-linejoin="round"/></svg>') 2 2, pointer !important;
-        }
+        .desktop-icon, .start-btn, .taskbar-item, .start-menu-item, button, .window-controls .material-icons, #user-display, .context-menu-item { cursor: pointer !important; }
 
-        .desktop-icon {
-            width: 90px; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            padding: 12px 8px; border-radius: 2px; transition: background-color 0.2s ease; text-align: center; color: #FFFFFF;
-        }
-        .desktop-icon:hover { background-color: rgba(0, 0, 0, 0.2); }
-        .desktop-icon .material-icons { font-size: 48px; margin-bottom: 8px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
-        .desktop-icon span { font-size: 13px; font-weight: 500; color: #FFFFFF; text-shadow: 0 1px 3px rgba(0,0,0,0.9), 0 0 4px rgba(0,0,0,0.6); }
+        .desktop-icon { width: 85px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 6px; border-radius: 0px; text-align: center; color: #FFFFFF; margin-bottom: 8px; }
+        .desktop-icon:hover { background-color: rgba(49, 106, 197, 0.6); outline: 1px dotted #ffffff; }
+        .desktop-icon .material-icons { font-size: 36px; margin-bottom: 4px; filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.8)); }
+        .desktop-icon span { font-size: 11px; font-weight: normal; color: #FFFFFF; text-shadow: 1px 1px 2px #000000; }
 
+        /* Панель задач */
         #taskbar {
-            position: fixed; bottom: 0; width: 100%; height: 48px; background-color: #263238;
-            display: none;
-            align-items: center; padding: 0 8px; box-sizing: border-box; z-index: 10000;
-            box-shadow: 0 -2px 4px -1px rgba(0,0,0,0.2), 0 -4px 5px 0 rgba(0,0,0,0.14), 0 -1px 10px 0 rgba(0,0,0,0.12);
+            position: fixed; bottom: 0; width: 100%; height: 30px; 
+            background: linear-gradient(to bottom, #245edb 0%, #1941a5 12%, #1e56c1 28%, #163e9f 70%, #113280 100%);
+            display: none; align-items: center; padding: 0; box-sizing: border-box; z-index: 10000; box-shadow: none; border-top: 1px solid #4287ff;
         }
 
-        .start-btn { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; transition: background-color 0.2s; color: #FFFFFF; }
-        .start-btn:hover { background-color: rgba(255, 255, 255, 0.1); }
-        .start-btn .material-icons { font-size: 26px; }
+        .start-btn { 
+            display: flex; align-items: center; justify-content: center; width: 90px; height: 100%; border-radius: 0 8px 8px 0; 
+            background: linear-gradient(to bottom, #66cd00 0%, #54b700 15%, #3aa000 45%, #258100 85%, #195b00 100%);
+            color: #FFFFFF; font-weight: bold; font-style: italic; font-size: 15px; text-shadow: 1px 1px 2px #000000; box-shadow: inset -2px 0 5px #fff, 2px 0 5px rgba(0,0,0,0.3);
+        }
+        .start-btn:hover { background: linear-gradient(to bottom, #76de00 0%, #4cb300 100%); }
+        .start-btn .material-icons { display: none; }
+        .start-btn::after { content: "пуск"; letter-spacing: 0.5px; }
 
-        #taskbar-apps { display: flex; flex-grow: 1; margin-left: 12px; gap: 6px; overflow-x: auto; }
-        #taskbar-apps::-webkit-scrollbar { display: none; }
+        #taskbar-apps { display: flex; flex-grow: 1; margin-left: 8px; gap: 4px; overflow-x: auto; height: 100%; align-items: center; }
         
-        .taskbar-item { display: flex; align-items: center; padding: 0 16px; height: 36px; background-color: transparent; color: #B0BEC5; border-radius: 2px; font-size: 14px; font-weight: 500; text-transform: uppercase; transition: background-color 0.15s, color 0.15s; max-width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .taskbar-item:hover { background-color: rgba(255, 255, 255, 0.1); color: #FFFFFF; }
-        .taskbar-item.active { background-color: rgba(255, 255, 255, 0.15); color: #FFFFFF; border-bottom: 2px solid #FF4081; }
-        .taskbar-item .material-icons { font-size: 18px; margin-right: 8px; }
+        .taskbar-item { 
+            display: flex; align-items: center; padding: 0 8px; height: 22px; background: linear-gradient(to bottom, #3a7be2 0%, #1e56c1 100%); color: #ffffff; border: 1px solid #1d4aa7; border-radius: 3px; font-size: 11px; font-weight: normal; text-transform: none; max-width: 150px; box-shadow: inset 1px 1px 1px rgba(255,255,255,0.3);
+        }
+        .taskbar-item:hover { background: linear-gradient(to bottom, #5390ef 0%, #2969df 100%); color: #FFFFFF; }
+        .taskbar-item.active { background: linear-gradient(to bottom, #163979 0%, #2053ad 100%); color: #FFFFFF; border: 1px solid #0c234d; border-bottom: none; box-shadow: inset 1px 1px 3px rgba(0,0,0,0.6); }
+        .taskbar-item .material-icons { font-size: 14px; margin-right: 4px; color: #fff !important; }
 
-        #user-display { display: flex; align-items: center; padding: 0 12px; height: 36px; border-radius: 2px; color: #FFFFFF; font-size: 14px; font-weight: 500; transition: background-color 0.2s; }
+        #user-display { display: flex; align-items: center; padding: 0 10px; height: 100%; border-radius: 0; color: #FFFFFF; font-size: 11px; border-left: 1px solid #1d4aa7; }
         #user-display:hover { background-color: rgba(255, 255, 255, 0.1); }
-        #user-display .material-icons { margin-right: 6px; font-size: 18px; }
+        #user-display .material-icons { margin-right: 4px; font-size: 14px; }
 
-        #clock { margin-left: 8px; font-size: 14px; font-weight: 500; color: #FFFFFF; padding-right: 8px; cursor: default; }
+        #clock { margin-left: 0; font-size: 11px; color: #FFFFFF; padding: 0 12px; height: 100%; background: linear-gradient(to bottom, #0f75bc 0%, #00aeef 100%); border-left: 1px solid #125180; box-shadow: inset 1px 0 2px rgba(255,255,255,0.4); display: flex; align-items: center; cursor: default; }
 
-        #start-menu { position: fixed; bottom: 56px; left: 16px; width: 280px; background-color: #FFFFFF; border-radius: 2px; box-shadow: 0 8px 10px 1px rgba(0,0,0,0.14), 0 3px 14px 2px rgba(0,0,0,0.12), 0 5px 5px -3px rgba(0,0,0,0.2); display: none; flex-direction: column; padding: 8px 0; z-index: 9999; transform-origin: bottom left; animation: menuPop 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
-        @keyframes menuPop { from { opacity: 0; transform: scale(0.9) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
-
-        .start-menu-item { display: flex; align-items: center; padding: 12px 24px; font-size: 15px; font-weight: 500; color: #212121; transition: background-color 0.15s; }
-        .start-menu-item:hover { background-color: #EEEEEE; }
-        .start-menu-item .material-icons { margin-right: 24px; font-size: 24px; color: #757575; }
+        #start-menu { 
+            position: fixed; bottom: 30px; left: 0; width: 320px; background-color: #ffffff; border: 2px solid #1d4aa7; border-radius: 5px 5px 0 0; box-shadow: 3px 3px 15px rgba(0,0,0,0.4); display: none; flex-direction: column; padding: 0; z-index: 9999; animation: none;
+        }
+        #start-menu::before { content: "InbleltOS Professional"; display: block; background: linear-gradient(to right, #1d4aa7, #4287ff); color: #ffffff; font-weight: bold; padding: 8px 12px; font-size: 13px; text-shadow: 1px 1px 1px rgba(0,0,0,0.5); border-bottom: 1px solid #133680; }
+        .start-menu-item { display: flex; align-items: center; padding: 6px 16px; font-size: 12px; color: #000000; font-weight: normal; }
+        .start-menu-item:hover { background-color: #316ac5; color: #ffffff; }
+        .start-menu-item .material-icons { margin-right: 12px; font-size: 18px; color: #757575; }
+        .start-menu-item:hover .material-icons { color: #ffffff; }
 
         /* Окна */
-        @keyframes windowAppear { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-        .window { position: absolute; background-color: #FAFAFA; color: #212121; border-radius: 2px; box-shadow: 0 16px 24px 2px rgba(0,0,0,0.14), 0 6px 30px 5px rgba(0,0,0,0.12), 0 8px 10px -5px rgba(0,0,0,0.2); display: flex; flex-direction: column; overflow: hidden; transition: opacity 0.2s, width 0.2s, height 0.2s; animation: windowAppear 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
-        .window.maximized { top: 0 !important; left: 0 !important; width: 100vw !important; height: calc(100vh - 48px) !important; border-radius: 0; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .window { position: absolute; background-color: #ece9d8; color: #000000; border: 3px solid #0046d5; border-top: none; border-radius: 5px 5px 0 0; box-shadow: 4px 4px 12px rgba(0,0,0,0.3); display: flex; flex-direction: column; overflow: hidden; animation: none; }
+        .window.maximized { top: 0 !important; left: 0 !important; width: 100vw !important; height: calc(100vh - 30px) !important; border-radius: 0; border: none; }
         
-        .title-bar { height: 56px; padding: 0 16px; display: flex; justify-content: space-between; align-items: center; color: #FFFFFF; cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5" fill="%23212121" stroke="%23ffffff" stroke-width="1.5"/></svg>') 12 12, grab !important; box-shadow: 0 2px 5px rgba(0,0,0,0.26); z-index: 10; }
-        .window.maximized .title-bar { cursor: default !important; }
-        .title-bar:active { cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" fill="%23FF4081" stroke="%23ffffff" stroke-width="1.5"/></svg>') 12 12, grabbing !important; }
-        .title-info { display: flex; align-items: center; font-weight: 500; font-size: 20px; }
-        .title-info .material-icons { font-size: 24px; margin-right: 16px; color: #FFFFFF; }
-        .window-controls { display: flex; gap: 8px; }
-        .window-controls .material-icons { font-size: 20px; padding: 8px; color: #FFFFFF; border-radius: 50%; transition: 0.15s; }
-        .window-controls .material-icons:hover { background-color: rgba(255, 255, 255, 0.2); }
-        .window-content { flex-grow: 1; overflow: hidden; display: flex; flex-direction: column; background-color: #FAFAFA; position: relative; }
+        .title-bar { 
+            height: 25px; padding: 0 6px; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(to bottom, #0058e6 0%, #2470f0 10%, #0054e3 50%, #0046d5 85%, #0037b6 100%); box-shadow: inset 0 1px 1px #fff; z-index: 10; border-radius: 3px 3px 0 0; cursor: default !important;
+        }
+        .title-info { display: flex; align-items: center; font-weight: bold; font-size: 12px; color: #ffffff; text-shadow: 1px 1px 1px rgba(0,0,0,0.7); }
+        .title-info .material-icons { font-size: 16px; margin-right: 6px; color: #FFFFFF; }
+        .window-controls { display: flex; gap: 3px; }
+        .window-controls .material-icons { 
+            font-size: 12px; width: 21px; height: 21px; display: flex; align-items: center; justify-content: center; color: #ffffff; border: 1px solid #ffffff; border-radius: 3px; background: linear-gradient(to bottom, #76aeef 0%, #4c87df 100%); box-shadow: inset 1px 1px 1px #fff; padding: 0;
+        }
+        .window-controls .material-icons:hover { background: linear-gradient(to bottom, #9ec4f5 0%, #669ee9 100%); }
+        .window-controls .material-icons:last-child { background: linear-gradient(to bottom, #e7633a 0%, #cc4316 40%, #b12303 100%); border: 1px solid #7c1200; }
+        .window-controls .material-icons:last-child:hover { background: linear-gradient(to bottom, #f38664 0%, #e05c30 100%); }
+        .window-content { flex-grow: 1; overflow: hidden; display: flex; flex-direction: column; background-color: #ffffff; position: relative; margin: 2px; border: 1px solid #7f9db9; }
 
-        /* Элементы MD1 */
-        button { background: #FF4081; color: white; border: none; padding: 8px 16px; border-radius: 2px; font-size: 14px; font-weight: 500; text-transform: uppercase; box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 1px 5px 0 rgba(0,0,0,0.12), 0 3px 1px -2px rgba(0,0,0,0.2); transition: background 0.2s, box-shadow 0.2s; font-family: 'Roboto', sans-serif; letter-spacing: 0.5px; }
-        button:hover { background: #F50057; box-shadow: 0 3px 3px 0 rgba(0,0,0,0.14), 0 1px 7px 0 rgba(0,0,0,0.12), 0 3px 1px -1px rgba(0,0,0,0.2); }
-        button:active { background: #C51162; box-shadow: 0 4px 5px 0 rgba(0,0,0,0.14), 0 1px 10px 0 rgba(0,0,0,0.12), 0 2px 4px -1px rgba(0,0,0,0.2); }
-        button:disabled { background: #B0BEC5; color: #78909C; box-shadow: none; cursor: not-allowed !important; }
+        /* Элементы управления (3D Кнопки и Инпуты) */
+        button { 
+            background: linear-gradient(to bottom, #ffffff 0%, #f2f0e4 40%, #ece9d8 70%, #dfdbc7 100%); color: #000000; border: 1px solid #003c74; padding: 3px 12px; border-radius: 3px; font-size: 12px; font-weight: normal; text-transform: none; box-shadow: inset 1px 1px 0 #fff; transition: none; font-family: Tahoma, sans-serif; letter-spacing: normal;
+        }
+        button:hover { background: linear-gradient(to bottom, #fff 0%, #ffeed5 50%, #ffcc7a 70%, #ffbb5c 100%); border-color: #ff9900; box-shadow: none; }
+        button:active { background: linear-gradient(to bottom, #cdcdcd 0%, #eaeaea 100%); box-shadow: inset 1px 1px 2px rgba(0,0,0,0.2); }
+        button:disabled { background: #e2e2e2; color: #aca899; border-color: #dcdcdc; box-shadow: none; }
         
-        input[type="text"], input[type="password"] { border: none; border-bottom: 2px solid #B0BEC5; background: transparent; padding: 8px 0; font-size: 16px; outline: none; transition: border-bottom-color 0.2s; font-family: 'Roboto', sans-serif; color: #212121; }
-        input[type="text"]:focus, input[type="password"]:focus { border-bottom-color: #3F51B5; }
+        input[type="text"], input[type="password"] { border: 1px solid #7f9db9; background: #FFFFFF; padding: 4px; font-size: 12px; outline: none; border-radius: 0; font-family: Tahoma, sans-serif; color: #000000; box-sizing: border-box; margin: 0; }
+        input[type="text"]:focus, input[type="password"]:focus { border-color: #ff9900; }
 
-        .app-notepad, input[type="text"], input[type="password"] { cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M12 4v16m-4-16h8m-8 16h8" stroke="%23212121" stroke-width="2" fill="none"/></svg>') 12 12, text !important; }
-        .app-terminal, .app-terminal-input { cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M12 4v16m-4-16h8m-8 16h8" stroke="%2300E676" stroke-width="2" fill="none"/></svg>') 12 12, text !important; }
+        .app-notepad, input[type="text"], input[type="password"], .app-terminal, .app-terminal-input { cursor: text !important; }
 
         /* Приложения */
-        .app-browser-container { display: flex; flex-direction: column; height: 100%; background: #FAFAFA; }
-        .app-browser-tabs-container { display: flex; background: #D32F2F; padding: 8px 8px 0 8px; align-items: flex-end; overflow-x: auto; }
-        .app-browser-tabs-container::-webkit-scrollbar { height: 4px; }
-        .app-browser-tabs-container::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 4px; }
-        .browser-tabs { display: flex; gap: 4px; flex-grow: 1; }
-        .browser-tab { display: flex; align-items: center; background: #EF5350; color: rgba(255,255,255,0.8); padding: 8px 12px; border-radius: 4px 4px 0 0; cursor: pointer; font-size: 13px; max-width: 200px; min-width: 120px; transition: background 0.2s, color 0.2s; }
-        .browser-tab:hover { background: #E57373; color: #FFF; }
-        .browser-tab.active { background: #EEEEEE; color: #212121; }
+        .app-browser-container { display: flex; flex-direction: column; height: 100%; background: #ece9d8; }
+        .app-browser-tabs-container { display: flex; background: #ece9d8; padding: 4px 4px 0 4px; align-items: flex-end; border-bottom: 1px solid #7f9db9; }
+        .browser-tabs { display: flex; gap: 2px; }
+        .browser-tab { display: flex; align-items: center; background: #e0e0d0; color: #000000; padding: 4px 10px; border: 1px solid #7f9db9; border-bottom: none; border-radius: 4px 4px 0 0; font-size: 11px; min-width: 100px; }
+        .browser-tab.active { background: #FFFFFF; font-weight: bold; position: relative; top: 1px; z-index: 2; border-bottom: 1px solid #fff; }
         .browser-tab .tab-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-grow: 1; margin-right: 8px; pointer-events: none; }
-        .browser-tab .close-tab { font-size: 16px; opacity: 0.6; transition: opacity 0.2s, background 0.2s; border-radius: 50%; }
-        .browser-tab .close-tab:hover { opacity: 1; background: rgba(0,0,0,0.1); }
-        .app-browser-bar { display: flex; padding: 8px 16px; background: #EEEEEE; gap: 12px; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); z-index: 5; }
-        .app-browser-bar input { flex-grow: 1; border: none; padding: 8px 12px; border-radius: 2px; background: #FFFFFF; font-size: 14px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.1); margin: 0; }
-        .app-browser-bar input:focus { outline: 1px solid #F44336; }
+        .browser-tab .close-tab { font-size: 12px; font-weight: bold; padding: 0; cursor: pointer; }
+        .app-browser-bar { display: flex; padding: 4px 8px; background: #ece9d8; gap: 8px; align-items: center; border-bottom: 1px solid #ababab; }
+        .app-browser-bar input { border: 1px solid #7f9db9; padding: 3px 6px; font-size: 11px; flex-grow: 1; }
         .browser-frames-container { flex-grow: 1; position: relative; }
         .browser-iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; display: none; background: #FFF; }
         .browser-iframe.active { display: block; }
         
-        .app-terminal { background: #263238; color: #00E676; font-family: 'Consolas', monospace; padding: 16px; display: flex; flex-direction: column; height: 100%; box-sizing: border-box; font-size: 14px;}
+        .app-terminal { background: #000000 !important; color: #ffffff !important; font-family: 'Lucida Console', 'Courier New', monospace; padding: 8px; display: flex; flex-direction: column; height: 100%; box-sizing: border-box; font-size: 13px;}
         .app-terminal-output { flex-grow: 1; overflow-y: auto; margin-bottom: 8px; white-space: pre-wrap; word-wrap: break-word; }
         .app-terminal-input-row { display: flex; align-items: center; }
-        .app-terminal-input-row span { margin-right: 8px; font-weight: bold;}
-        .app-terminal-input { flex-grow: 1; border: none; color: #00E676; outline: none; border-bottom: none; padding: 0;}
+        .app-terminal-input-row span { margin-right: 8px;}
+        .app-terminal-input { flex-grow: 1; border: none; background: transparent; color: #ffffff; outline: none; padding: 0;}
         
-        .app-calc { display: flex; flex-direction: column; height: 100%; background: #FAFAFA; }
-        .app-calc-display { background: #FFFFFF; padding: 24px 16px; font-size: 36px; text-align: right; box-shadow: 0 1px 3px rgba(0,0,0,0.12); overflow: hidden; text-overflow: ellipsis; color: #212121; }
-        .app-calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); flex-grow: 1; }
-        .app-calc-btn { background: #FAFAFA; border: none; border-right: 1px solid #E0E0E0; border-bottom: 1px solid #E0E0E0; border-radius: 0; font-size: 20px; font-weight: 400; color: #212121; box-shadow: none; transition: background 0.15s; text-transform: none; }
-        .app-calc-btn:hover { background: #EEEEEE; }
-        .app-calc-btn.op { background: #EEEEEE; color: #3F51B5; font-weight: 500; }
-        .app-calc-btn.equal { background: #3F51B5; color: #FFFFFF; grid-column: span 2; }
-        .app-calc-btn.equal:hover { background: #303F9F; }
+        .app-calc { background: #ece9d8; padding: 4px; display: flex; flex-direction: column; height: 100%; box-sizing: border-box; }
+        .app-calc-display { background: #FFFFFF; border: 1px solid #7f9db9; padding: 4px 8px; font-family: 'Courier New', monospace; font-size: 22px; color: #000; text-align: right; margin-bottom: 6px; }
+        .app-calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; flex-grow: 1; }
+        .app-calc-btn { background: #f0f0e8; border: 1px solid #7f9db9; border-radius: 0; font-size: 12px; font-weight: bold; color: #0000ff; }
+        .app-calc-btn:hover { background: #ffeed5; }
+        .app-calc-btn.op { color: #ff0000; }
+        .app-calc-btn.equal { background: #f0f0e8; color: #ff0000; grid-column: span 2; }
+        
+        /* Задачи */
+        .app-tasks { padding: 12px; display: flex; flex-direction: column; height: 100%; box-sizing: border-box; background: #ece9d8; }
+        .task-input-row { display: flex; gap: 8px; margin-bottom: 12px; align-items: flex-end; }
+        .task-input-row input { flex-grow: 1; }
+        .task-list { list-style: none; padding: 0; margin: 0; flex-grow: 1; overflow-y: auto; background: #FFFFFF; border: 2px inset #dfdfdf; }
+        .task-item { display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px solid #eee; }
+        .task-item.completed span { text-decoration: line-through; color: #757575; }
 
-        .app-tasks { padding: 24px; display: flex; flex-direction: column; height: 100%; box-sizing: border-box; background: #FAFAFA;}
-        .task-input-row { display: flex; gap: 16px; margin-bottom: 24px; align-items: flex-end; }
-        .task-input-row input { flex-grow: 1; margin-bottom: 4px; }
-        .task-list { list-style: none; padding: 0; margin: 0; flex-grow: 1; overflow-y: auto; background: #FFFFFF; box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); border-radius: 2px;}
-        .task-item { display: flex; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 1px solid #EEEEEE; transition: background 0.2s;}
-        .task-item:last-child { border-bottom: none; }
-        .task-item:hover { background: #F5F5F5; }
-        .task-item.completed span { text-decoration: line-through; color: #9E9E9E; }
-        .task-item button { background: transparent; color: #757575; box-shadow: none; padding: 8px; border-radius: 50%; opacity: 0;}
-        .task-item button:hover { background: rgba(0,0,0,0.05); color: #F44336; }
-        .task-item:hover button { opacity: 1; }
-
-        /* Вкладки Настроек */
-        .app-settings { display: flex; flex-direction: column; height: 100%; background: #FAFAFA; }
-        .settings-nav { display: flex; background: #607D8B; padding: 0 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .settings-tab-btn { background: transparent; color: rgba(255,255,255,0.7); box-shadow: none; border-radius: 0; padding: 16px 24px; border-bottom: 2px solid transparent; font-size: 14px; font-weight: 500; }
-        .settings-tab-btn:hover { background: rgba(255,255,255,0.1); box-shadow: none; color: #FFF; }
-        .settings-tab-btn.active { color: #FFF; border-bottom-color: #FFF; }
-        .settings-content { padding: 24px; flex-grow: 1; overflow-y: auto; }
-        .settings-section { display: none; animation: fadeIn 0.2s ease; }
+        /* Настройки */
+        .app-settings { display: flex; flex-direction: column; height: 100%; background: #ece9d8; font-size: 12px; }
+        .settings-nav { display: flex; padding: 4px 4px 0 4px; border-bottom: 1px solid #7f9db9; background: #ece9d8; }
+        .settings-tab-btn { background: #ece9d8; border: 1px solid #7f9db9; border-bottom: none; border-radius: 3px 3px 0 0; margin-right: 2px; padding: 6px 12px; box-shadow: none; color: #000; }
+        .settings-tab-btn.active { background: #ffffff; font-weight: bold; position: relative; top: 1px; border-bottom: 1px solid #ffffff; }
+        .settings-content { padding: 16px; flex-grow: 1; overflow-y: auto; background: #ffffff; border: 1px solid #7f9db9; margin: 0 4px 4px 4px; }
+        .settings-section { display: none; }
         .settings-section.active { display: block; }
-        .settings-content h3 { margin-top: 0; font-weight: 500; font-size: 20px; color: #212121; margin-bottom: 8px; }
-        .color-picker-row { display: flex; align-items: center; gap: 16px; margin-top: 24px; padding: 16px; background: #FFFFFF; border-radius: 2px; box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); }
-        .color-picker-row input[type="color"] { cursor: pointer; border: none; width: 48px; height: 48px; padding: 0; background: none; }
+        .settings-content h3 { font-size: 14px; margin-top: 0; margin-bottom: 12px; color: #003399; }
+        .color-picker-row { display: flex; align-items: center; gap: 16px; margin-top: 12px; padding: 8px; background: #ece9d8; border: 1px solid #7f9db9; }
+        .color-picker-row input[type="color"] { cursor: pointer; border: 1px solid #7f9db9; width: 48px; height: 32px; padding: 0; background: #fff; }
+
+        /* Проводник */
+        .explorer-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+        .explorer-table th { background: linear-gradient(to bottom, #ece9d8 0%, #dcd8c4 100%); padding: 4px 6px; font-weight: normal; border-right: 1px solid #b5b2a0; border-bottom: 1px solid #b5b2a0; color: #000; text-align: left; }
+        .explorer-table td { padding: 4px 6px; color: #000000; border-bottom: 1px solid #eee; }
+        .explorer-table tr:hover td { background: #316ac5; color: #ffffff; }
 
         /* Контекстное Меню */
-        #context-menu { position: fixed; background-color: #FFFFFF; border-radius: 2px; box-shadow: 0 8px 10px 1px rgba(0,0,0,0.14), 0 3px 14px 2px rgba(0,0,0,0.12), 0 5px 5px -3px rgba(0,0,0,0.2); padding: 8px 0; min-width: 200px; z-index: 20000; display: none; transform-origin: top left; animation: menuPop 0.15s cubic-bezier(0.4, 0, 0.2, 1); }
-        .context-menu-item { display: flex; align-items: center; padding: 12px 24px; font-size: 15px; font-weight: 400; color: #212121; transition: background-color 0.15s; }
-        .context-menu-item:hover { background-color: #EEEEEE; }
-        .context-menu-item .material-icons { margin-right: 24px; font-size: 20px; color: #757575; }
-
-        /* Стили Проводника */
-        .explorer-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; background: white; }
-        .explorer-table th { background: #ECEFF1; padding: 10px; font-weight: 500; border-bottom: 1px solid #CFD8DC; color: #455A64; }
-        .explorer-table td { padding: 10px; border-bottom: 1px solid #F5F5F5; color: #212121; vertical-align: middle; }
-        .explorer-table tr:hover td { background: #F5F5F5; }
+        #context-menu { position: fixed; background-color: #FFFFFF; border: 1px solid #7f9db9; padding: 2px; min-width: 160px; z-index: 20000; box-shadow: 2px 2px 4px rgba(0,0,0,0.2); display: none; }
+        .context-menu-item { padding: 4px 16px; font-size: 11px; color: #000; display: flex; align-items: center; cursor: pointer; }
+        .context-menu-item:hover { background-color: #316ac5; color: #ffffff; }
+        .context-menu-item .material-icons { margin-right: 8px; font-size: 14px; color: #757575; }
+        .context-menu-item:hover .material-icons { color: #ffffff; }
     </style>
 </head>
 <body>
@@ -299,16 +228,16 @@
             <div style="display: flex; flex-direction: column; gap: 16px; margin-top: 8px;">
                 <div style="display: flex; flex-direction: column; gap: 4px;">
                     <label style="font-size: 13px; font-weight: 500; color: #757575;">Имя пользователя *</label>
-                    <input type="text" id="setup-username" placeholder="Например: Admin" style="border-bottom-color: #009688;">
+                    <input type="text" id="setup-username" placeholder="Например: Admin">
                 </div>
                 <div style="display: flex; flex-direction: column; gap: 4px;">
                     <label style="font-size: 13px; font-weight: 500; color: #757575;">Пароль (необязательно)</label>
-                    <input type="password" id="setup-password" placeholder="Введите пароль" style="border-bottom-color: #009688;">
+                    <input type="password" id="setup-password" placeholder="Введите пароль">
                 </div>
             </div>
             
             <div style="display: flex; justify-content: flex-end; margin-top: 16px;">
-                <button id="setup-submit-btn" style="background: #009688; padding: 10px 24px; font-size: 14px;">Установить систему</button>
+                <button id="setup-submit-btn">Установить систему</button>
             </div>
         </div>
     </div>
@@ -320,12 +249,12 @@
         <div id="login-users-list"></div>
         
         <div id="password-container">
-            <span class="material-icons" style="font-size: 72px; color: #009688;">account_circle</span>
-            <span id="password-target-user" style="font-size: 20px; font-weight: 500; color: #212121;">Пользователь</span>
+            <span class="material-icons" style="font-size: 72px; color: #0046d5;">account_circle</span>
+            <span id="password-target-user" style="font-size: 20px; font-weight: bold; color: #212121;">Пользователь</span>
             <input type="password" id="login-password-input" placeholder="Введите пароль" style="width: 100%;">
             <div id="login-error-msg" style="color: #F44336; font-size: 14px; display: none; font-weight: 500;">Неверный пароль!</div>
             <div style="display: flex; gap: 12px; width: 100%; justify-content: flex-end; margin-top: 8px;">
-                <button id="password-back-btn" style="background: transparent; color: #757575; box-shadow: none;">Назад</button>
+                <button id="password-back-btn">Назад</button>
                 <button id="password-submit-btn">Войти</button>
             </div>
         </div>
@@ -370,7 +299,7 @@
         <div class="context-menu-item" onclick="location.reload()">
             <span class="material-icons">refresh</span> Обновить
         </div>
-        <div style="height: 1px; background: #E0E0E0; margin: 8px 0;"></div>
+        <div style="height: 1px; background: #E0E0E0; margin: 4px 0;"></div>
         <div class="context-menu-item" onclick="launchApp('notepad')">
             <span class="material-icons">note_add</span> Создать файл
         </div>
@@ -401,7 +330,7 @@
         <div class="start-menu-item" onclick="launchApp('settings')">
             <span class="material-icons" style="color: #607D8B;">settings</span> Настройки
         </div>
-        <div style="height: 1px; background: #E0E0E0; margin: 8px 0;"></div>
+        <div style="height: 1px; background: #E0E0E0; margin: 4px 0;"></div>
         <div class="start-menu-item" onclick="logoutSystem()">
             <span class="material-icons" style="color: #757575;">power_settings_new</span> Завершение работы
         </div>
@@ -428,11 +357,11 @@
             overlay.innerHTML = `
                 <div style="background: #FFFFFF; min-width: 280px; max-width: 420px; padding: 24px; border-radius: 2px; box-shadow: 0 9px 46px 8px rgba(0,0,0,0.14), 0 11px 15px -7px rgba(0,0,0,0.12), 0 24px 38px 3px rgba(0,0,0,0.2); animation: windowAppear 0.2s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; gap: 12px;">
                     <h3 style="margin-top: 0; margin-bottom: 0; font-weight: 500; font-size: 20px; color: #212121; display: flex; align-items: center; gap: 8px;">
-                        <span class="material-icons" style="color: #FF4081;">info</span> Система
+                        <span class="material-icons" style="color: #0046d5;">info</span> Система
                     </h3>
                     <div style="font-size: 15px; color: #757575; line-height: 1.5; white-space: pre-wrap; word-break: break-word; padding: 4px 0 12px 0;">${message}</div>
                     <div style="display: flex; justify-content: flex-end;">
-                        <button id="os-alert-ok-btn" style="background: transparent; color: #FF4081; box-shadow: none; font-weight: 500; font-size: 14px; padding: 8px 16px;">ОК</button>
+                        <button id="os-alert-ok-btn" style="padding: 4px 16px;">ОК</button>
                     </div>
                 </div>
             `;
@@ -440,8 +369,6 @@
             document.body.appendChild(overlay);
             
             const okBtn = overlay.querySelector('#os-alert-ok-btn');
-            okBtn.style.cursor = `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="28" viewBox="0 0 24 28"><path d="M2 2 L14 14 H8.5 L12 21.5 L9.5 22.5 L6 15 L2 19 V2 Z" fill="%23FF4081" stroke="%23ffffff" stroke-width="1.5" stroke-linejoin="round"/></svg>') 2 2, pointer`;
-            
             okBtn.onclick = () => { overlay.remove(); };
         };
 
@@ -569,10 +496,10 @@
                     loginScreenEl.style.backgroundImage = 'none';
                     loginScreenEl.style.backgroundColor = savedBg;
                 } else {
-                    loginScreenEl.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.45)), url('https://images.unsplash.com/photo-1534067783921-91c384be527a?q=80&w=1920&auto=format&fit=crop')`;
+                    loginScreenEl.style.backgroundImage = `none`;
                 }
             } else {
-                loginScreenEl.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.45)), url('https://images.unsplash.com/photo-1534067783921-91c384be527a?q=80&w=1920&auto=format&fit=crop')`;
+                loginScreenEl.style.backgroundImage = `none`;
             }
 
             const listEl = document.getElementById('login-users-list');
@@ -642,7 +569,7 @@
             const savedBg = loadUserData('bg_color');
             const savedImg = loadUserData('bg_image');
 
-            document.body.style.backgroundColor = savedBg || '#ECEFF1';
+            document.body.style.backgroundColor = savedBg || '#3b6ea5';
             if (savedImg) {
                 document.body.style.backgroundImage = `url('${savedImg}')`;
             } else {
@@ -662,7 +589,7 @@
             document.getElementById('desktop').style.display = 'none';
             document.getElementById('taskbar').style.display = 'none';
             document.getElementById('start-menu').style.display = 'none';
-            document.body.style.backgroundColor = '#ECEFF1';
+            document.body.style.backgroundColor = '#3b6ea5';
             document.body.style.backgroundImage = '';
 
             document.querySelectorAll('.window').forEach(w => w.remove());
@@ -728,12 +655,12 @@
             'explorer': {
                 icon: 'folder', title: 'Проводник', width: 650, height: 450, color: '#FFB300',
                 content: `
-                    <div style="padding: 16px; display: flex; flex-direction: column; height: 100%; box-sizing: border-box; background: #FAFAFA;">
+                    <div style="padding: 16px; display: flex; flex-direction: column; height: 100%; box-sizing: border-box; background: #ffffff;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                            <h3 style="margin: 0; font-weight: 500; font-size: 18px; color: #37474F;">Локальное изолированное хранилище</h3>
-                            <span style="color: #009688; font-size: 13px; font-weight: 500; display: flex; align-items: center;"><span class="material-icons" style="font-size: 16px; margin-right: 4px;">lock</span> Строгая изоляция: включена</span>
+                            <h3 style="margin: 0; font-weight: normal; font-size: 16px; color: #000;">Локальное изолированное хранилище</h3>
+                            <span style="color: #009688; font-size: 11px; display: flex; align-items: center;"><span class="material-icons" style="font-size: 14px; margin-right: 4px;">lock</span> Строгая изоляция: включена</span>
                         </div>
-                        <div style="flex-grow: 1; border: 1px solid #E0E0E0; border-radius: 2px; overflow-y: auto; background: #FFF;">
+                        <div style="flex-grow: 1; border: 1px solid #7f9db9; overflow-y: auto; background: #FFF;">
                             <table class="explorer-table">
                                 <thead>
                                     <tr>
@@ -769,15 +696,15 @@
                                 const sizeKb = (file.size / 1024).toFixed(1);
 
                                 tr.innerHTML = `
-                                    <td style="display: flex; align-items: center; gap: 8px; font-weight: 500;">
+                                    <td style="display: flex; align-items: center; gap: 8px;">
                                         <span class="material-icons" style="color: #757575;">${typeIcon}</span>
                                         <span style="max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${file.name}">${file.name}</span>
                                     </td>
-                                    <td style="color: #757575; font-size: 13px;">${file.type.split('/')[1] || 'unknown'}</td>
+                                    <td style="color: #757575; font-size: 11px;">${file.type.split('/')[1] || 'unknown'}</td>
                                     <td>${sizeKb} КБ</td>
-                                    <td style="color: #757575; font-size: 13px;">${file.date}</td>
+                                    <td style="color: #757575; font-size: 11px;">${file.date}</td>
                                     <td style="text-align: right; padding-right: 12px;">
-                                        <button class="exp-del-btn material-icons" data-id="${file.id}" style="background:transparent; color:#F44336; box-shadow:none; padding:4px;" title="Удалить безвозвратно">delete</button>
+                                        <button class="exp-del-btn material-icons" data-id="${file.id}" style="background:transparent; border:none; box-shadow:none; color:#F44336; padding:4px;" title="Удалить безвозвратно">delete</button>
                                     </td>
                                 `;
                                 tbody.appendChild(tr);
@@ -803,13 +730,13 @@
             'store': {
                 icon: 'storefront', title: 'Магазин приложений', width: 550, height: 450, color: '#E91E63',
                 content: `
-                    <div style="padding: 24px; display: flex; flex-direction: column; height: 100%; box-sizing: border-box; background: #FAFAFA;">
-                        <h3 style="margin-top: 0; font-weight: 500; font-size: 20px; color: #212121; margin-bottom: 4px;">Каталог Inblelt Store</h3>
-                        <p style="color: #757575; margin-bottom: 16px; font-size: 13px; margin-top: 0;">Сканирование репозитория: lastochka-app/inblelt-store</p>
-                        <div id="store-loader" style="text-align: center; padding: 48px; color: #757575; font-size: 15px;">
+                    <div style="padding: 16px; display: flex; flex-direction: column; height: 100%; box-sizing: border-box; background: #ece9d8;">
+                        <h3 style="margin-top: 0; font-weight: normal; font-size: 16px; color: #000; margin-bottom: 4px;">Каталог Inblelt Store</h3>
+                        <p style="color: #757575; margin-bottom: 16px; font-size: 11px; margin-top: 0;">Сканирование репозитория: lastochka-app/inblelt-store</p>
+                        <div id="store-loader" style="text-align: center; padding: 48px; color: #757575; font-size: 13px;">
                             <span class="material-icons" style="animation: spin 1.5s linear infinite; font-size: 32px; vertical-align: middle; margin-right: 12px; color: #E91E63;">refresh</span> Загрузка приложений...
                         </div>
-                        <ul class="task-list" id="store-apps-list" style="display: none; flex-grow: 1; overflow-y: auto; background: #FFFFFF; border: 1px solid #E0E0E0;"></ul>
+                        <ul class="task-list" id="store-apps-list" style="display: none;"></ul>
                     </div>
                 `,
                 init: (win) => {
@@ -842,11 +769,11 @@
                                     <div style="display:flex; align-items:center; gap:12px;">
                                         <span class="material-icons" style="color: #E91E63; font-size: 28px;">extension</span>
                                         <div style="display:flex; flex-direction:column;">
-                                            <span style="font-size:16px; font-weight:500; color:#212121;">${appDisplayName}</span>
-                                            <span style="font-size:12px; color:#757575;">Размер: ${(file.size / 1024).toFixed(1)} КБ</span>
+                                            <span style="font-size:14px; font-weight:bold; color:#000;">${appDisplayName}</span>
+                                            <span style="font-size:11px; color:#757575;">Размер: ${(file.size / 1024).toFixed(1)} КБ</span>
                                         </div>
                                     </div>
-                                    <button class="store-install-btn" data-url="${file.download_url}" data-name="${appDisplayName}" style="background: #E91E63;">Установить</button>
+                                    <button class="store-install-btn" data-url="${file.download_url}" data-name="${appDisplayName}">Установить</button>
                                 `;
                                 list.appendChild(li);
                             });
@@ -911,7 +838,6 @@
                                                 renderCustomDesktopIcons();
 
                                                 btn.innerText = 'Готово';
-                                                btn.style.background = '#4CAF50';
                                                 alert(`Приложение "${manifest.title || appName}" успешно установлено из Магазина!`);
                                             });
                                         })
@@ -955,9 +881,9 @@
                             li.innerHTML = `
                                 <label style="display:flex; align-items:center; gap:16px; cursor:pointer; flex-grow:1;">
                                     <input type="checkbox" ${t.completed ? 'checked' : ''} data-index="${i}">
-                                    <span style="font-size:16px;">${t.text}</span>
+                                    <span style="font-size:13px;">${t.text}</span>
                                 </label>
-                                <button class="material-icons" data-index="${i}" style="font-size:20px;">delete</button>
+                                <button class="material-icons" data-index="${i}" style="font-size:16px; background:transparent; box-shadow:none; border:none; padding:4px;">delete</button>
                             `;
                             list.appendChild(li);
                         });
@@ -990,12 +916,12 @@
             'notepad': {
                 icon: 'description', title: 'Блокнот', width: 500, height: 400, color: '#FF9800',
                 content: `
-                    <div style="display: flex; flex-direction: column; height: 100%; background: #FAFAFA;">
-                        <div style="padding: 8px 16px; background: #EEEEEE; display: flex; gap: 8px; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); z-index: 2;">
-                            <input type="text" id="np-filename" value="Новый_документ.txt" style="flex-grow: 1; padding: 4px 8px; font-size: 14px; border: 1px solid #CFD8DC; border-radius: 2px; outline: none;">
-                            <button id="np-save-vfs" style="background: #FF9800; color: white; padding: 6px 16px; font-size: 13px;">СОХРАНИТЬ В ПРОВОДНИК</button>
+                    <div style="display: flex; flex-direction: column; height: 100%; background: #ffffff;">
+                        <div style="padding: 4px; background: #ece9d8; display: flex; gap: 8px; align-items: center; border-bottom: 1px solid #7f9db9;">
+                            <input type="text" id="np-filename" value="Новый_документ.txt" style="flex-grow: 1;">
+                            <button id="np-save-vfs">Сохранить</button>
                         </div>
-                        <textarea class="app-notepad" placeholder="Начните вводить текст..." style="flex-grow: 1; border: none; padding: 16px; resize: none; outline: none;"></textarea>
+                        <textarea class="app-notepad" placeholder="" style="flex-grow: 1; border: none; padding: 6px; resize: none; outline: none; font-family: 'Courier New', monospace; font-size: 14px;"></textarea>
                     </div>
                 `,
                 init: (win) => {
@@ -1011,7 +937,7 @@
                         const text = ta.value;
                         const blob = new Blob([text], { type: 'text/plain' });
                         VFS.addFile(currentUser, name, 'text/plain', blob).then(() => {
-                            alert(`Файл "${name}" успешно сохранен в изолированный Проводник!`);
+                            alert(`Файл "${name}" успешно сохранен!`);
                         });
                     });
                 } 
@@ -1022,13 +948,13 @@
                     <div class="app-browser-container">
                         <div class="app-browser-tabs-container">
                             <div class="browser-tabs"></div>
-                            <button class="browser-new-tab material-icons" style="background: transparent; color: #FFF; box-shadow: none; padding: 4px; margin-bottom: 4px;" title="Новая вкладка">add</button>
+                            <button class="browser-new-tab" style="padding: 2px 8px; font-weight: bold;" title="Новая вкладка">+</button>
                         </div>
                         <div class="app-browser-bar">
-                            <button class="browser-refresh material-icons" style="background: transparent; color: #757575; box-shadow: none; padding: 4px;" title="Обновить">refresh</button>
-                            <input type="text" class="browser-url" placeholder="Введите веб-адрес...">
-                            <button class="browser-go" style="background:#F44336;">Перейти</button>
-                            <button class="browser-dl-file material-icons" style="background: #009688; color: white; margin-left: 4px; padding: 6px; font-size: 20px; border-radius: 2px;" title="Скачать этот URL в Проводник ОС">file_download</button>
+                            <button class="browser-refresh material-icons" style="font-size: 14px; padding: 2px 6px;" title="Обновить">refresh</button>
+                            <input type="text" class="browser-url" placeholder="Адрес...">
+                            <button class="browser-go">Перейти</button>
+                            <button class="browser-dl-file material-icons" style="margin-left: 4px; font-size: 14px; padding: 2px 6px;" title="Скачать">file_download</button>
                         </div>
                         <div class="browser-frames-container"></div>
                     </div>
@@ -1050,7 +976,7 @@
                         const id = 'tab_' + (++tabCounter) + '_' + Date.now();
                         const tabEl = document.createElement('div');
                         tabEl.className = 'browser-tab';
-                        tabEl.innerHTML = `<span class="tab-title">Загрузка...</span><span class="material-icons close-tab">close</span>`;
+                        tabEl.innerHTML = `<span class="tab-title">Загрузка...</span><span class="close-tab">x</span>`;
                         
                         const useProxy = !url.includes('wikipedia.org');
                         const iframeUrl = useProxy ? 'https://corsproxy.io/?' + encodeURIComponent(url) : url;
@@ -1127,9 +1053,6 @@
                             alert("Пожалуйста, укажите прямую ссылку на конкретный скачиваемый файл в адресной строке.");
                             return;
                         }
-                        
-                        dlBtn.innerText = 'hourglass_empty';
-                        dlBtn.disabled = true;
 
                         fetch(url)
                             .then(res => {
@@ -1141,23 +1064,17 @@
                                 if (filename.includes('?')) filename = filename.split('?')[0];
                                 
                                 VFS.addFile(currentUser, filename, type, blob).then(() => {
-                                    alert(`Файл "${filename}" успешно загружен в кэш Проводника веб-ОС!`);
+                                    alert(`Файл загружен.`);
                                 });
                             })
                             .catch(err => {
-                                console.warn("Запрос заблокирован CORS политикой реального сайта. Эмулируем скачивание тестового файла...");
-                                let mockData = `Содержимое веб-документа с адреса: ${url}\nСкачано: ${new Date().toLocaleString()}\nСистема безопасности: Файл изолирован от хост-компьютера.`;
+                                let mockData = `Заглушка для CORS...`;
                                 let mockBlob = new Blob([mockData], { type: 'text/plain' });
-                                let filename = url.substring(url.lastIndexOf('/') + 1) || 'web_document.txt';
-                                if (!filename.includes('.')) filename += '.txt';
+                                let filename = 'web_document.txt';
                                 
                                 VFS.addFile(currentUser, filename, 'text/plain', mockBlob).then(() => {
-                                    alert(`Из-за CORS ограничений сети интернет сгенерирован изолированный слепок файла "${filename}" и помещен в Проводник!`);
+                                    alert(`Из-за ограничений сохранен тестовый файл.`);
                                 });
-                            })
-                            .finally(() => {
-                                dlBtn.innerText = 'file_download';
-                                dlBtn.disabled = false;
                             });
                     });
 
@@ -1168,7 +1085,7 @@
                 icon: 'terminal', title: 'Терминал', width: 550, height: 350, color: '#37474F',
                 content: `
                     <div class="app-terminal">
-                        <div class="app-terminal-output" id="term-out">InbleltOS [Version 10.01 Matterhorn]<br><br></div>
+                        <div class="app-terminal-output" id="term-out">Microsoft Windows XP [Version 5.1.2600]<br>(C) Copyright 1985-2001 Microsoft Corp.<br><br></div>
                         <div class="app-terminal-input-row">
                             <span id="term-prompt"></span>
                             <input type="text" id="term-in" class="app-terminal-input" autocomplete="off">
@@ -1178,28 +1095,28 @@
                 init: (win) => {
                     const input = win.querySelector('#term-in');
                     const output = win.querySelector('#term-out');
-                    win.querySelector('#term-prompt').innerText = `${currentUser}@inblelt:~$`;
+                    win.querySelector('#term-prompt').innerText = `C:\\Documents and Settings\\${currentUser}>`;
                     input.focus();
                     input.addEventListener('keypress', (e) => {
                         if(e.key === 'Enter') {
                             const val = input.value.trim();
-                            output.innerHTML += `<div>${currentUser}@inblelt:~$ ${val}</div>`;
+                            output.innerHTML += `<div>C:\\Documents and Settings\\${currentUser}> ${val}</div>`;
                             input.value = '';
                             if(val === 'help') output.innerHTML += `<div>Доступно: help, date, clear, calc, store, explorer, exit</div>`;
                             else if(val === 'date') output.innerHTML += `<div>${new Date().toString()}</div>`;
-                            else if(val === 'clear') output.innerHTML = 'InbleltOS [Version 10.01 Matterhorn]<br><br>';
+                            else if(val === 'clear') output.innerHTML = 'Microsoft Windows XP [Version 5.1.2600]<br><br>';
                             else if(val === 'calc') launchApp('calculator');
                             else if(val === 'store') launchApp('store');
                             else if(val === 'explorer') launchApp('explorer');
                             else if(val === 'exit') logoutSystem();
-                            else if(val !== '') output.innerHTML += `<div>Команда не найдена: ${val}</div>`;
+                            else if(val !== '') output.innerHTML += `<div>'${val}' не является внутренней или внешней командой, исполняемой программой или пакетным файлом.</div>`;
                             output.scrollTop = output.scrollHeight;
                         }
                     });
                 }
             },
             'calculator': {
-                icon: 'calculate', title: 'Калькулятор', width: 320, height: 460, color: '#673AB7',
+                icon: 'calculate', title: 'Калькулятор', width: 220, height: 260, color: '#673AB7',
                 content: `
                     <div class="app-calc">
                         <div class="app-calc-display" id="calc-display">0</div>
@@ -1207,22 +1124,22 @@
                             <button class="app-calc-btn" onclick="calcInput('7')">7</button>
                             <button class="app-calc-btn" onclick="calcInput('8')">8</button>
                             <button class="app-calc-btn" onclick="calcInput('9')">9</button>
-                            <button class="app-calc-btn op" onclick="calcOp('/')">÷</button>
+                            <button class="app-calc-btn op" onclick="calcOp('/')">/</button>
                             
                             <button class="app-calc-btn" onclick="calcInput('4')">4</button>
                             <button class="app-calc-btn" onclick="calcInput('5')">5</button>
                             <button class="app-calc-btn" onclick="calcInput('6')">6</button>
-                            <button class="app-calc-btn op" onclick="calcOp('*')">×</button>
+                            <button class="app-calc-btn op" onclick="calcOp('*')">*</button>
                             
                             <button class="app-calc-btn" onclick="calcInput('1')">1</button>
                             <button class="app-calc-btn" onclick="calcInput('2')">2</button>
                             <button class="app-calc-btn" onclick="calcInput('3')">3</button>
                             <button class="app-calc-btn op" onclick="calcOp('-')">-</button>
                             
-                            <button class="app-calc-btn" onclick="calcInput('C')">C</button>
+                            <button class="app-calc-btn op" onclick="calcInput('C')">C</button>
                             <button class="app-calc-btn" onclick="calcInput('0')">0</button>
                             <button class="app-calc-btn op" onclick="calcOp('+')">+</button>
-                            <button class="app-calc-btn equal" onclick="calcEval()" style="background:#673AB7;">=</button>
+                            <button class="app-calc-btn equal" onclick="calcEval()">=</button>
                         </div>
                     </div>
                 `,
@@ -1255,69 +1172,50 @@
                 icon: 'settings', title: 'Настройки', width: 450, height: 530, color: '#607D8B',
                 content: `
                     <div class="app-settings">
-                        <div style="background: #ECEFF1; text-align: center; padding: 8px; font-size: 13px; color: #455A64; font-weight: 500; border-bottom: 1px solid #CFD8DC;">
-                            <span class="material-icons" style="font-size: 14px; vertical-align: middle; margin-right: 4px;">landscape</span>
-                            InbleltOS Version 10.01 Matterhorn
-                        </div>
-                        
                         <div class="settings-nav">
                             <button class="settings-tab-btn active" data-target="settings-theme">Оформление</button>
                             <button class="settings-tab-btn" data-target="settings-users">Аккаунты</button>
-                            <button class="settings-tab-btn" data-target="settings-apps">Приложения</button>
+                            <button class="settings-tab-btn" data-target="settings-apps">Программы</button>
                         </div>
                         <div class="settings-content">
                             <div id="settings-theme" class="settings-section active">
-                                <h3>Оформление стола</h3>
-                                <p style="color: #757575; font-size: 14px;">Цвет и обои применяются для профиля <b><span class="set-curr-user"></span></b>.</p>
+                                <h3>Оформление рабочего стола</h3>
+                                <p style="color: #000; font-size: 11px;">Цвет и обои применяются для профиля <b><span class="set-curr-user"></span></b>.</p>
                                 
                                 <div class="color-picker-row">
-                                    <label style="flex-grow: 1; font-size: 16px;">Основной цвет фона</label>
+                                    <label style="flex-grow: 1; font-size: 12px;">Основной цвет фона:</label>
                                     <input type="color" id="bg-color-picker">
                                 </div>
                                 
-                                <h4 style="margin-top: 24px; margin-bottom: 8px; color: #212121; font-weight: 500; font-size: 16px;">Обои рабочего стола (Matterhorn Collection)</h4>
-                                <div id="wallpaper-grid" style="display: flex; gap: 12px; flex-wrap: wrap;">
-                                    <div class="wallpaper-thumb" data-url="" style="width: 80px; height: 50px; background: #ECEFF1; border: 2px solid #CFD8DC; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #757575;" title="Без обоев">
-                                        <span class="material-icons" style="font-size: 20px;">block</span>
-                                    </div>
-                                    
-                                    <div class="wallpaper-thumb" data-url="https://images.unsplash.com/photo-1534067783921-91c384be527a?q=80&w=1920&auto=format&fit=crop" style="width: 80px; height: 50px; background: url('https://images.unsplash.com/photo-1534067783921-91c384be527a?q=80&w=200&auto=format&fit=crop') center/cover; border: 2px solid transparent; border-radius: 4px; cursor: pointer;" title="Маттерхорн: День"></div>
-                                    
-                                    <div class="wallpaper-thumb" data-url="https://img.wallscloud.net/uploads/thumb/2763507831/YNXrkDykNW8-1024x576-MM-80.webp" style="width: 80px; height: 50px; background: url('https://img.wallscloud.net/uploads/thumb/2763507831/YNXrkDykNW8-1024x576-MM-80.webp') center/cover; border: 2px solid transparent; border-radius: 4px; cursor: pointer;" title="Маттерхорн: Вечер"></div>
-                                    
-                                    <div class="wallpaper-thumb" data-url="https://images.unsplash.com/photo-1549880181-56a44cf4a9a1?q=80&w=1920&auto=format&fit=crop" style="width: 80px; height: 50px; background: url('https://images.unsplash.com/photo-1549880181-56a44cf4a9a1?q=80&w=200&auto=format&fit=crop') center/cover; border: 2px solid transparent; border-radius: 4px; cursor: pointer;" title="Маттерхорн: Ночь"></div>
-
-                                    <div class="wallpaper-thumb" data-url="https://images.unsplash.com/photo-1528650743849-c5c2fc71aab4?q=80&w=1920&auto=format&fit=crop" style="width: 80px; height: 50px; background: url('https://images.unsplash.com/photo-1528650743849-c5c2fc71aab4?q=80&w=200&auto=format&fit=crop') center/cover; border: 2px solid transparent; border-radius: 4px; cursor: pointer;" title="Маттерхорн: Рассвет"></div>
-
-                                    <div class="wallpaper-thumb" data-url="https://images.unsplash.com/photo-1518730518541-d0843268c287?q=80&w=1920&auto=format&fit=crop" style="width: 80px; height: 50px; background: url('https://images.unsplash.com/photo-1518730518541-d0843268c287?q=80&w=200&auto=format&fit=crop') center/cover; border: 2px solid transparent; border-radius: 4px; cursor: pointer;" title="Маттерхорн: Зима"></div>
-
-                                    <div class="wallpaper-thumb" data-url="https://images.unsplash.com/photo-1600100397608-250810777085?q=80&w=1920&auto=format&fit=crop" style="width: 80px; height: 50px; background: url('https://images.unsplash.com/photo-1600100397608-250810777085?q=80&w=200&auto=format&fit=crop') center/cover; border: 2px solid transparent; border-radius: 4px; cursor: pointer;" title="Маттерхорн: Облака"></div>
-                                    
-                                    <div class="wallpaper-thumb" data-url="https://images.unsplash.com/photo-1553105659-d081f407b71c?q=80&w=1920&auto=format&fit=crop" style="width: 80px; height: 50px; background: url('https://images.unsplash.com/photo-1553105659-d081f407b71c?q=80&w=200&auto=format&fit=crop') center/cover; border: 2px solid transparent; border-radius: 4px; cursor: pointer;" title="Маттерхорн: Минимализм"></div>
+                                <h3 style="margin-top: 16px;">Фоновый рисунок (Обои)</h3>
+                                <div id="wallpaper-grid" style="display: flex; gap: 8px; flex-wrap: wrap; padding: 4px; border: 2px inset #dfdfdf; background: #fff;">
+                                    <div class="wallpaper-thumb" data-url="" style="width: 80px; height: 50px; background: #ECEFF1; border: 1px solid #7f9db9; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #757575;" title="Без обоев">Нет</div>
+                                    <div class="wallpaper-thumb" data-url="https://images.unsplash.com/photo-1534067783921-91c384be527a?q=80&w=1920&auto=format&fit=crop" style="width: 80px; height: 50px; background: url('https://images.unsplash.com/photo-1534067783921-91c384be527a?q=80&w=200&auto=format&fit=crop') center/cover; border: 1px solid #7f9db9; cursor: pointer;"></div>
+                                    <div class="wallpaper-thumb" data-url="https://img.wallscloud.net/uploads/thumb/2763507831/YNXrkDykNW8-1024x576-MM-80.webp" style="width: 80px; height: 50px; background: url('https://img.wallscloud.net/uploads/thumb/2763507831/YNXrkDykNW8-1024x576-MM-80.webp') center/cover; border: 1px solid #7f9db9; cursor: pointer;"></div>
                                 </div>
 
-                                <div style="margin-top: 24px;">
-                                    <button id="reset-bg-btn" style="background: transparent; color: #607D8B; box-shadow: none;">СБРОСИТЬ ВСЕ</button>
+                                <div style="margin-top: 16px; text-align: right;">
+                                    <button id="reset-bg-btn">Восстановить умолчания</button>
                                 </div>
                             </div>
                             
                             <div id="settings-users" class="settings-section">
                                 <h3>Управление пользователями</h3>
-                                <p style="color: #757575; margin-bottom: 16px;">Текущий профиль: <b><span class="set-curr-user"></span></b></p>
+                                <p style="color: #000; margin-bottom: 8px;">Текущий профиль: <b><span class="set-curr-user"></span></b></p>
                                 
-                                <ul class="task-list" id="settings-users-list" style="margin-bottom: 16px; border: 1px solid #E0E0E0; max-height: 160px;"></ul>
+                                <ul class="task-list" id="settings-users-list" style="margin-bottom: 12px; max-height: 120px;"></ul>
                                 
-                                <div class="task-input-row" style="margin-bottom:0; flex-direction: column; gap: 8px; align-items: stretch;">
+                                <div class="task-input-row" style="flex-direction: column; gap: 4px; align-items: stretch;">
                                     <input type="text" id="new-user-input" placeholder="Имя нового пользователя">
                                     <input type="password" id="new-user-pass" placeholder="Пароль (пусто — без пароля)">
-                                    <button id="add-user-btn" style="background: #009688; align-self: flex-end; margin-top: 4px;">Добавить</button>
+                                    <button id="add-user-btn" style="align-self: flex-end; margin-top: 4px;">Создать</button>
                                 </div>
                             </div>
 
                             <div id="settings-apps" class="settings-section">
                                 <h3>Установленные программы</h3>
-                                <p style="color: #757575; margin-bottom: 12px;">Здесь отображаются все сторонние расширения, загруженные из официального Магазина.</p>
-                                <ul class="task-list" id="settings-apps-list" style="border: 1px solid #E0E0E0; max-height: 260px; overflow-y:auto;"></ul>
+                                <p style="color: #000; margin-bottom: 12px;">Сторонние расширения из Магазина:</p>
+                                <ul class="task-list" id="settings-apps-list" style="max-height: 200px;"></ul>
                             </div>
                         </div>
                     </div>
@@ -1340,7 +1238,7 @@
                     // Управление фоном (Цвет)
                     const colorPicker = win.querySelector('#bg-color-picker');
                     const resetBtn = win.querySelector('#reset-bg-btn');
-                    colorPicker.value = loadUserData('bg_color') || '#ECEFF1';
+                    colorPicker.value = loadUserData('bg_color') || '#3b6ea5';
 
                     colorPicker.addEventListener('input', (e) => {
                         const color = e.target.value;
@@ -1358,8 +1256,8 @@
                         }
                         saveUserData('bg_image', url);
                         
-                        wallpaperThumbs.forEach(t => t.style.borderColor = (t.dataset.url === url) ? '#009688' : 'transparent');
-                        if(!url) wallpaperThumbs[0].style.borderColor = '#CFD8DC';
+                        wallpaperThumbs.forEach(t => t.style.borderColor = (t.dataset.url === url) ? '#0046d5' : '#7f9db9');
+                        if(!url) wallpaperThumbs[0].style.borderColor = '#0046d5';
                     };
 
                     const savedImg = loadUserData('bg_image') || '';
@@ -1375,8 +1273,8 @@
                     resetBtn.addEventListener('click', () => {
                         localStorage.removeItem(getUserKey('bg_color'));
                         localStorage.removeItem(getUserKey('bg_image'));
-                        document.body.style.backgroundColor = '#ECEFF1';
-                        colorPicker.value = '#ECEFF1';
+                        document.body.style.backgroundColor = '#3b6ea5';
+                        colorPicker.value = '#3b6ea5';
                         applyWallpaper('');
                     });
 
@@ -1393,12 +1291,11 @@
                             li.className = 'task-item';
                             const isCurrent = u.name === currentUser;
                             li.innerHTML = `
-                                <div style="display:flex; align-items:center; gap:12px;">
-                                    <span class="material-icons" style="color: ${isCurrent ? '#009688' : '#9E9E9E'}">account_circle</span>
-                                    <span style="font-size:16px; font-weight: ${isCurrent ? '500' : '400'}">${u.name}</span>
-                                    ${u.password ? '<span class="material-icons" style="font-size: 16px; color: #757575;" title="Защищен паролем">lock</span>' : ''}
+                                <div style="display:flex; align-items:center; gap:8px;">
+                                    <span class="material-icons" style="font-size:16px;">account_circle</span>
+                                    <span style="font-weight: ${isCurrent ? 'bold' : 'normal'}">${u.name}</span>
                                 </div>
-                                ${!isCurrent ? `<button class="delete-user-btn" data-user="${u.name}" style="background:transparent; color:#F44336; box-shadow:none;">УДАЛИТЬ</button>` : ''}
+                                ${!isCurrent ? `<button class="delete-user-btn" data-user="${u.name}" style="padding:2px 6px;">Удалить</button>` : ''}
                             `;
                             usersListContainer.appendChild(li);
                         });
@@ -1440,7 +1337,7 @@
                         appsListContainer.innerHTML = '';
                         const appKeys = Object.keys(installedApps);
                         if (appKeys.length === 0) {
-                            appsListContainer.innerHTML = '<li class="task-item" style="color: #757575;">Нет установленных приложений</li>';
+                            appsListContainer.innerHTML = '<li class="task-item" style="color: #757575;">Нет установленных программ</li>';
                             return;
                         }
                         appKeys.forEach(id => {
@@ -1448,11 +1345,11 @@
                             const li = document.createElement('li');
                             li.className = 'task-item';
                             li.innerHTML = `
-                                <div style="display:flex; align-items:center; gap:12px;">
-                                    <span class="material-icons" style="color: ${app.color || '#9C27B0'}">${app.icon || 'extension'}</span>
-                                    <span style="font-size:16px;">${app.title} [${id}]</span>
+                                <div style="display:flex; align-items:center; gap:8px;">
+                                    <span class="material-icons" style="font-size:16px; color: ${app.color || '#9C27B0'}">${app.icon || 'extension'}</span>
+                                    <span>${app.title}</span>
                                 </div>
-                                <button class="delete-app-btn" data-appid="${id}" style="background:transparent; color:#F44336; box-shadow:none;">УДАЛИТЬ</button>
+                                <button class="delete-app-btn" data-appid="${id}" style="padding:2px 6px;">Удалить</button>
                             `;
                             appsListContainer.appendChild(li);
                         });
@@ -1493,9 +1390,7 @@
                                 if (frame.contentWindow) {
                                     frame.contentWindow.alert = window.alert;
                                 }
-                            } catch(e) { 
-                                console.warn("Не удалось привязать alert фрейма:", e); 
-                            }
+                            } catch(e) { }
                         };
                     }
                 }
@@ -1542,7 +1437,7 @@
             windowEl.style.height = `${app.height}px`;
 
             windowEl.innerHTML = `
-                <div class="title-bar" style="background-color: ${app.color};">
+                <div class="title-bar">
                     <div class="title-info"><span class="material-icons">${app.icon}</span> ${app.title}</div>
                     <div class="window-controls">
                         <span class="material-icons minimize-btn" title="Свернуть">remove</span>
@@ -1555,7 +1450,7 @@
 
             const tbItem = document.createElement('div');
             tbItem.className = 'taskbar-item active';
-            tbItem.innerHTML = `<span class="material-icons" style="color: ${app.color};">${app.icon}</span> ${app.title}`;
+            tbItem.innerHTML = `<span class="material-icons" style="color: #fff;">${app.icon}</span> ${app.title}`;
             document.getElementById('taskbar-apps').appendChild(tbItem);
 
             const bringToFront = () => {
